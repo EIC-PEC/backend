@@ -14,6 +14,7 @@ describe('CheckinService', () => {
       findFirst: jest.fn(),
       findMany: jest.fn(),
       update: jest.fn(),
+      updateMany: jest.fn().mockResolvedValue({ count: 1 }),
     },
     checkIn: {
       create: jest.fn(),

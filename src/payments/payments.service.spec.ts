@@ -5,9 +5,14 @@ import { PaymentStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PaymentsService } from './payments.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 
 describe('PaymentsService', () => {
   let service: PaymentsService;
+
+  const mockEmailService = {
+    sendPassConfirmationEmail: jest.fn().mockResolvedValue(true),
+  };
 
   const mockPrismaService: any = {
     registration: {
@@ -15,9 +20,13 @@ describe('PaymentsService', () => {
       update: jest.fn(),
     },
     payment: {
+      create: jest.fn(),
       findUnique: jest.fn(),
       update: jest.fn(),
       updateMany: jest.fn(),
+    },
+    registration: {
+      findMany: jest.fn(),
     },
     $transaction: jest.fn(async (cb: any) => cb(mockPrismaService)),
   };
@@ -42,6 +51,7 @@ describe('PaymentsService', () => {
         PaymentsService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: EmailService, useValue: mockEmailService },
       ],
     }).compile();
 

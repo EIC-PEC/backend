@@ -10,7 +10,7 @@ describe('RegistrationsService', () => {
   let service: RegistrationsService;
 
   const mockEmailService = {
-    sendPassConfirmation: jest.fn().mockResolvedValue(true),
+    sendPassConfirmationEmail: jest.fn().mockResolvedValue(true),
   };
 
   const mockPrismaService: any = {
@@ -221,7 +221,7 @@ describe('RegistrationsService', () => {
       expect(passes).toHaveLength(1);
       expect(passes[0].passId).toBe('PEC-111111');
       expect(passes[0].categoryTitle).toBeDefined();
-      expect(passes[0].qrCodeDataUrl).toContain('api.qrserver.com');
+      expect(passes[0].qrCodeDataUrl).toContain('data:image/png;base64');
     });
   });
 
