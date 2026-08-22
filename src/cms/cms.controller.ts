@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
@@ -27,13 +28,13 @@ import { UpdateSiteConfigDto } from './dto/update-site-config.dto';
 
 // ── Bundle: single-payload for frontend bootstrap ──────────────────────────
 
-
 @SkipThrottle()
 @Controller('cms/bundle')
 export class BundleController {
   constructor(private readonly cms: CmsService) {}
 
   @Public()
+  @Header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600')
   @Get()
   async getBundle() {
     return this.cms.getBundle();

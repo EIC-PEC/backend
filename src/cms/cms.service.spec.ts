@@ -2,10 +2,21 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { CmsService } from './cms.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { CacheService } from '../common/cache/cache.service';
 
 describe('CmsService', () => {
   let service: CmsService;
   let prisma: PrismaService;
+
+  const mockCacheService = {
+    get: jest.fn().mockReturnValue(null),
+    set: jest.fn(),
+    getOrSet: jest.fn(async (key: string, ttl: number, factory: () => Promise<any>) => factory()),
+    invalidate: jest.fn(),
+    invalidatePrefix: jest.fn(),
+    invalidateTag: jest.fn(),
+    flush: jest.fn(),
+  };
 
   const mockPrismaService = {
     event: {
@@ -49,6 +60,7 @@ describe('CmsService', () => {
       providers: [
         CmsService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: CacheService, useValue: mockCacheService },
       ],
     }).compile();
 

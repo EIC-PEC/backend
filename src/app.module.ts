@@ -4,6 +4,7 @@ import { APP_GUARD, APP_INTERCEPTOR, APP_FILTER } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { validateEnv } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
+import { CacheModule } from './common/cache/cache.module';
 import { AuthModule } from './auth/auth.module';
 import { RegistrationsModule } from './registrations/registrations.module';
 import { PaymentsModule } from './payments/payments.module';
@@ -39,6 +40,7 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
     ]),
 
     PrismaModule,
+    CacheModule,
     EmailModule,
     AuthModule,
     RegistrationsModule,
