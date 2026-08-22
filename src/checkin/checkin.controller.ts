@@ -17,7 +17,7 @@ import { CheckinService } from './checkin.service';
 export class CheckinController {
   constructor(private readonly checkinService: CheckinService) {}
 
-  @Roles(Role.VOLUNTEER_CHECKIN, Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.GATE, Role.ADMIN)
   @Post('verify-qr')
   @HttpCode(HttpStatus.OK)
   async verifyQr(
@@ -27,7 +27,7 @@ export class CheckinController {
     return this.checkinService.verifyQrCheckIn(dto, volunteerUserId);
   }
 
-  @Roles(Role.VOLUNTEER_CHECKIN, Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.GATE, Role.ADMIN)
   @Post('manual-lookup')
   @HttpCode(HttpStatus.OK)
   async manualLookup(
@@ -37,7 +37,7 @@ export class CheckinController {
     return this.checkinService.manualLookup(dto, volunteerUserId);
   }
 
-  @Roles(Role.VOLUNTEER_CHECKIN, Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.GATE, Role.ADMIN)
   @Get('stats')
   async getCheckInStats() {
     return this.checkinService.getCheckInStats();

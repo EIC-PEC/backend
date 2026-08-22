@@ -12,11 +12,9 @@ generator client {
 // ─── Auth & Role Enums ────────────────────────────────────────────────────────
 
 enum Role {
-  SUPER_ADMIN
-  ORGANIZER
-  VOLUNTEER_CHECKIN
-  INVESTOR
-  DELEGATE
+  ADMIN
+  GATE
+  USER
 }
 
 enum PassType {
@@ -44,7 +42,7 @@ model User {
   college             String?
   gradYear            String?
   city                String?
-  role                Role                 @default(DELEGATE)
+  role                Role                 @default(USER)
   referralCode        String?
   referredById        String?              @db.ObjectId
   referredBy          User?                @relation("CAReferrals", fields: [referredById], references: [id], onDelete: NoAction, onUpdate: NoAction)

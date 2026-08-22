@@ -36,7 +36,7 @@ export class HealthController {
   /**
    * Detailed health probe for authorized admins/monitoring services.
    */
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Get('detailed')
   async detailedCheck() {
     let database = 'up';

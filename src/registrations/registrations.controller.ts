@@ -39,7 +39,7 @@ export class RegistrationsController {
     return this.registrationsService.getMyPasses(userId);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post(':id/revoke')
   @HttpCode(HttpStatus.OK)
   async revokePass(

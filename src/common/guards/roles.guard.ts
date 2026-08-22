@@ -22,10 +22,18 @@ export class RolesGuard implements CanActivate {
 
     if (!user) throw new ForbiddenException('Authentication required');
 
-    // SUPER_ADMIN is an implicit member of every role set.
-    if (user.role === Role.SUPER_ADMIN) return true;
+    // ADMIN role has universal access to all staff/admin routes
+    if (user.role === Role.ADMIN || (user.role as string) === 'SUPER_ADMIN' || (user.role as string) === 'ORGANIZER') return true;
 
-    if (!required.includes(user.role)) {
+    // GATE role check
+    const hasRole = required.some((r) => {
+      if (r === Role.ADMIN) return user.role === Role.ADMIN || (user.role as string) === 'SUPER_ADMIN' || (user.role as string) === 'ORGANIZER';
+      if (r === Role.GATE) return user.role === Role.GATE || (user.role as string) === 'VOLUNTEER_CHECKIN';
+      if (r === Role.USER) return user.role === Role.USER || (user.role as string) === 'DELEGATE';
+      return r === user.role;
+    });
+
+    if (!hasRole) {
       throw new ForbiddenException(`Requires one of the following roles: ${required.join(', ')}`);
     }
 

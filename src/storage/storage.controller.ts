@@ -115,14 +115,14 @@ export class StorageController {
   constructor(private readonly storageService: StorageService) {}
 
   /** Only admins/organizers can check infrastructure status. */
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Get('status')
   @ApiOperation({ summary: 'Get Cloudflare R2 storage integration status (Admin only)' })
   getStatus() {
     return this.storageService.getStatus();
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post('upload')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Upload file to Cloudflare R2 bucket (Organizer+ only)' })

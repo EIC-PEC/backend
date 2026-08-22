@@ -53,7 +53,7 @@ export class SiteConfigController {
     return this.cms.getSiteConfig();
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Put()
   async update(@Body() dto: UpdateSiteConfigDto) {
     return this.cms.updateSiteConfig(dto);
@@ -79,26 +79,26 @@ export class EventsController {
     return this.cms.getEventById(id);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateEventDto) {
     return this.cms.createEvent(dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateEventDto>) {
     return this.cms.updateEvent(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateEventDto>) {
     return this.cms.updateEvent(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -125,26 +125,26 @@ export class SpeakersController {
     return this.cms.getSpeakerById(id);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateSpeakerDto) {
     return this.cms.createSpeaker(dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateSpeakerDto>) {
     return this.cms.updateSpeaker(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateSpeakerDto>) {
     return this.cms.updateSpeaker(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -165,26 +165,26 @@ export class ScheduleController {
     return this.cms.getScheduleItems(day ? parseInt(day, 10) : undefined);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateScheduleItemDto) {
     return this.cms.createScheduleItem(dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateScheduleItemDto>) {
     return this.cms.updateScheduleItem(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateScheduleItemDto>) {
     return this.cms.updateScheduleItem(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -205,26 +205,26 @@ export class SponsorsController {
     return this.cms.getSponsors();
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateSponsorDto) {
     return this.cms.createSponsor(dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateSponsorDto>) {
     return this.cms.updateSponsor(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateSponsorDto>) {
     return this.cms.updateSponsor(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -251,26 +251,26 @@ export class AlumniController {
     return this.cms.getAlumniById(id);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateAlumniDto) {
     return this.cms.createAlumni(dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateAlumniDto>) {
     return this.cms.updateAlumni(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateAlumniDto>) {
     return this.cms.updateAlumni(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -291,26 +291,26 @@ export class FaqsController {
     return this.cms.getFaqs(category);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateFaqDto) {
     return this.cms.createFaq(dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateFaqDto>) {
     return this.cms.updateFaq(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateFaqDto>) {
     return this.cms.updateFaq(id, dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -331,14 +331,14 @@ export class GalleryController {
     return this.cms.getGallery();
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateGalleryDto) {
     return this.cms.createGalleryItem(dto);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -359,14 +359,14 @@ export class PortfolioEventsController {
     return this.cms.getPortfolioEventMedia();
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.OK)
   async set(@Body() body: { eventId: string; imageUrl: string }) {
     return this.cms.setPortfolioEventImage(body.eventId, body.imageUrl);
   }
 
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':eventId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('eventId') eventId: string) {

@@ -30,7 +30,7 @@ export class SubscribersController {
   }
 
   @ApiBearerAuth()
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Get()
   @ApiOperation({ summary: 'Get all email subscribers (Organizer+ only)' })
   async getAll() {
@@ -38,7 +38,7 @@ export class SubscribersController {
   }
 
   @ApiBearerAuth()
-  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a subscriber by ID (Organizer+ only)' })

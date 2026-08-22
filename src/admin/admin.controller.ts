@@ -15,7 +15,7 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { AdminService } from './admin.service';
 
 @Controller('admin')
-@Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+@Roles(Role.ADMIN)
 export class AdminController {
   constructor(private readonly adminService: AdminService) {}
 
@@ -57,7 +57,7 @@ export class AdminController {
     return this.adminService.toggleCheckInOverride(id);
   }
 
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Patch('users/:id/role')
   @HttpCode(HttpStatus.OK)
   async updateUserRole(
@@ -91,7 +91,7 @@ export class AdminController {
     return this.adminService.getAuditLogs(pageNum, limitNum, search, action, entity);
   }
 
-  @Roles(Role.SUPER_ADMIN)
+  @Roles(Role.ADMIN)
   @Post('audit-logs/prune')
   @HttpCode(HttpStatus.OK)
   async pruneAuditLogs(@Body('olderThanDays') olderThanDays?: number) {
