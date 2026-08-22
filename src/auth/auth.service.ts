@@ -66,7 +66,7 @@ export class AuthService {
     // An unknown referral code is ignored rather than rejected — a delegate should
     // never be blocked from registering because a CA typo'd their code.
     const referrer = dto.referralCode
-      ? await this.prisma.user.findUnique({
+      ? await this.prisma.user.findFirst({
           where: { referralCode: dto.referralCode.toUpperCase() },
           select: { id: true },
         })
@@ -261,7 +261,7 @@ export class AuthService {
       ).join('');
       const code = `PEC${suffix}`;
 
-      const taken = await this.prisma.user.findUnique({
+      const taken = await this.prisma.user.findFirst({
         where: { referralCode: code },
         select: { id: true },
       });

@@ -65,7 +65,7 @@ export class RegistrationsService {
       } else {
         let referredById: string | undefined;
         if (dto.referralCode) {
-          const referrer = await this.prisma.user.findUnique({
+          const referrer = await this.prisma.user.findFirst({
             where: { referralCode: dto.referralCode.trim().toUpperCase() },
           });
           if (referrer) {

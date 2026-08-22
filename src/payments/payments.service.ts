@@ -93,7 +93,7 @@ export class PaymentsService {
     const payment = await this.prisma.payment.findUnique({
       where: { orderId: dto.orderId },
       include: {
-        registration: {
+        registrations: {
           include: {
             user: true,
           },
@@ -138,9 +138,10 @@ export class PaymentsService {
         },
       });
 
-      if (payment.registration) {
+      const reg = payment.registrations?.[0];
+      if (reg) {
         await tx.registration.update({
-          where: { id: payment.registration.id },
+          where: { id: reg.id },
           data: {
             amountPaid: payment.amount,
           },
@@ -153,8 +154,8 @@ export class PaymentsService {
     this.logger.log(`Payment confirmed for Order ${dto.orderId}`);
 
     // Asynchronously dispatch pass email with QR badge
-    if (payment.registration && payment.registration.user) {
-      const reg = payment.registration;
+    const reg = payment.registrations?.[0];
+    if (reg && reg.user) {
       QRCode.toDataURL(reg.qrToken, { width: 240, margin: 2 })
         .then((qrDataUrl) => {
           return this.emailService.sendPassConfirmationEmail({
