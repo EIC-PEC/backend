@@ -81,7 +81,7 @@ export class AuthService {
         college: dto.college,
         gradYear: dto.gradYear,
         city: dto.city,
-        role: Role.DELEGATE,
+        role: Role.USER,
         referralCode: await this.generateUniqueReferralCode(),
         referredById: referrer?.id ?? null,
       },

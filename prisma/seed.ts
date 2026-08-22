@@ -13,9 +13,9 @@ async function main() {
   // ── Seed Demo Staff & Admin Users ─────────────────────────────────────────
   const defaultPasswordHash = await argon2.hash('PecSummit@2026');
   const demoUsers = [
-    { email: 'admin@pecsummit.com', name: 'Summit Admin', role: (Role as any).ADMIN || Role.SUPER_ADMIN, referralCode: 'PECADMIN' },
-    { email: 'volunteer@pecsummit.com', name: 'Gate Staff', role: (Role as any).GATE || Role.VOLUNTEER_CHECKIN, referralCode: 'PECGATE' },
-    { email: 'user@pecsummit.com', name: 'Sample Attendee', role: (Role as any).USER || Role.DELEGATE, referralCode: 'PECUSER' },
+    { email: 'admin@pecsummit.com', name: 'Summit Admin', role: Role.ADMIN, referralCode: 'PECADMIN' },
+    { email: 'volunteer@pecsummit.com', name: 'Gate Staff', role: Role.GATE, referralCode: 'PECGATE' },
+    { email: 'user@pecsummit.com', name: 'Sample Attendee', role: Role.USER, referralCode: 'PECUSER' },
   ];
 
   for (const u of demoUsers) {

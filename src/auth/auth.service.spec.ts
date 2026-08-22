@@ -13,6 +13,7 @@ describe('AuthService', () => {
   const mockPrismaService: any = {
     user: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       create: jest.fn(),
     },
     refreshToken: {
@@ -76,7 +77,7 @@ describe('AuthService', () => {
         name: registerDto.name,
         phone: registerDto.phone,
         college: registerDto.college,
-        role: Role.DELEGATE,
+        role: Role.USER,
         referralCode: 'PEC999999',
         createdAt: new Date(),
       });
@@ -110,7 +111,7 @@ describe('AuthService', () => {
         id: 'user-id-2',
         email: loginDto.email,
         name: 'Delegate User',
-        role: Role.DELEGATE,
+        role: Role.USER,
         passwordHash,
       });
 
@@ -135,7 +136,7 @@ describe('AuthService', () => {
         id: 'user-id-3',
         email: loginDto.email,
         name: 'Delegate User',
-        role: Role.DELEGATE,
+        role: Role.USER,
         passwordHash: wrongHash,
       });
 
@@ -151,7 +152,7 @@ describe('AuthService', () => {
         id: 'user-id-1',
         email: 'delegate@pecsummit.com',
         name: 'Delegate User',
-        role: Role.DELEGATE,
+        role: Role.USER,
         registrations: [
           {
             passId: 'PEC-894210',

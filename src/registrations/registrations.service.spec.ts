@@ -4,9 +4,14 @@ import { BadRequestException, ConflictException, NotFoundException } from '@nest
 import { PassType, PaymentStatus, Role } from '@prisma/client';
 import { RegistrationsService } from './registrations.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 
 describe('RegistrationsService', () => {
   let service: RegistrationsService;
+
+  const mockEmailService = {
+    sendPassConfirmation: jest.fn().mockResolvedValue(true),
+  };
 
   const mockPrismaService: any = {
     registration: {
@@ -18,6 +23,7 @@ describe('RegistrationsService', () => {
     },
     user: {
       findUnique: jest.fn(),
+      findFirst: jest.fn(),
       create: jest.fn(),
     },
     payment: {
@@ -41,6 +47,7 @@ describe('RegistrationsService', () => {
         RegistrationsService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: ConfigService, useValue: mockConfigService },
+        { provide: EmailService, useValue: mockEmailService },
       ],
     }).compile();
 
@@ -85,7 +92,7 @@ describe('RegistrationsService', () => {
         id: 'user-rohan',
         email: validDto.email,
         name: validDto.name,
-        role: Role.DELEGATE,
+        role: Role.USER,
       });
       mockPrismaService.registration.findFirst.mockResolvedValue(null);
       mockPrismaService.registration.findUnique.mockResolvedValue(null); // for passId uniqueness check

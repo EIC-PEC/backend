@@ -55,7 +55,7 @@ model User {
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 
-  @@index([role])
+  @@index([role, createdAt])
   @@index([referralCode])
   @@index([referredById])
 }
@@ -94,8 +94,9 @@ model Registration {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  @@index([userId])
-  @@index([passType])
+  @@index([userId, passType])
+  @@index([isCheckedIn, passType])
+  @@index([createdAt])
   @@index([paymentId])
 }
 
@@ -125,8 +126,9 @@ model CheckIn {
   gateName    String   @default("MAIN_GATE")
   timestamp   DateTime @default(now())
 
-  @@index([userId])
-  @@index([timestamp])
+  @@index([userId, timestamp])
+  @@index([scannedById, timestamp])
+  @@index([gateName, timestamp])
 }
 
 // ─── CMS Content Models ───────────────────────────────────────────────────────

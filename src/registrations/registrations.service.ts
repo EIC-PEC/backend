@@ -86,7 +86,7 @@ export class RegistrationsService {
             college: dto.college?.trim(),
             gradYear: dto.gradYear?.trim(),
             city: dto.city?.trim(),
-            role: Role.DELEGATE,
+            role: Role.USER,
             referralCode: generatedReferralCode,
             referredById,
           },

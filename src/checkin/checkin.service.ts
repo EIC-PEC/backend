@@ -90,20 +90,41 @@ export class CheckinService {
       });
     }
 
-    const [checkInRecord] = await this.prisma.$transaction([
-      this.prisma.checkIn.create({
-        data: {
-          userId: registration.userId,
-          scannedById: volunteerUserId,
-          gateName,
-          timestamp: new Date(),
-        },
-      }),
-      this.prisma.registration.update({
-        where: { id: registration.id },
-        data: { isCheckedIn: true },
-      }),
-    ]);
+    // Atomic Conditional Update: Only updates if isCheckedIn is STILL false
+    const updateResult = await this.prisma.registration.updateMany({
+      where: {
+        id: registration.id,
+        isCheckedIn: false,
+      },
+      data: {
+        isCheckedIn: true,
+      },
+    });
+
+    if (updateResult.count === 0) {
+      const lastCheckIn = await this.prisma.checkIn.findFirst({
+        where: { userId: registration.userId },
+        include: { scannedBy: { select: { name: true, email: true } } },
+        orderBy: { timestamp: 'desc' },
+      });
+
+      throw new ConflictException({
+        statusCode: 409,
+        error: 'Duplicate Check-In Prevented (Concurrency Lock)',
+        message: `Pass ${registration.passId} was ALREADY checked in. Simultaneous scan collision prevented.`,
+        alreadyCheckedIn: true,
+        previousCheckIn: lastCheckIn,
+      });
+    }
+
+    const checkInRecord = await this.prisma.checkIn.create({
+      data: {
+        userId: registration.userId,
+        scannedById: volunteerUserId,
+        gateName,
+        timestamp: new Date(),
+      },
+    });
 
     const catalog = PASS_TIERS_CATALOG.find((t) => t.enumType === registration.passType);
 
@@ -119,15 +140,16 @@ export class CheckinService {
       delegateEmail: registration.user.email,
       delegateCollege: registration.user.college,
       passType: registration.passType,
-      badgeTitle: catalog?.badgeTitle || 'DELEGATE',
-      gateName,
-      timestamp: checkInRecord.timestamp,
+      tierBadge: catalog?.badgeTitle || 'OFFICIAL PASS',
+      tracks: (registration as any).tracks,
+      gateName: checkInRecord.gateName,
+      checkInTime: checkInRecord.timestamp,
     };
   }
 
   async manualLookup(dto: ManualLookupDto, volunteerUserId?: string) {
     const q = dto.query.trim();
-    const gateName = dto.gateName?.trim() || 'MANUAL_DESK';
+    const gateName = dto.gateName?.trim() || 'MAIN_GATE';
 
     const attendees = await this.prisma.registration.findMany({
       where: {
@@ -151,23 +173,23 @@ export class CheckinService {
 
     if (dto.performCheckIn && attendees.length === 1) {
       const reg = attendees[0];
-      if (reg.isCheckedIn) {
+      
+      const updateResult = await this.prisma.registration.updateMany({
+        where: { id: reg.id, isCheckedIn: false },
+        data: { isCheckedIn: true },
+      });
+
+      if (updateResult.count === 0) {
         throw new ConflictException(`Pass ${reg.passId} is already checked in.`);
       }
 
-      await this.prisma.$transaction([
-        this.prisma.checkIn.create({
-          data: {
-            userId: reg.userId,
-            scannedById: volunteerUserId || reg.userId,
-            gateName,
-          },
-        }),
-        this.prisma.registration.update({
-          where: { id: reg.id },
-          data: { isCheckedIn: true },
-        }),
-      ]);
+      await this.prisma.checkIn.create({
+        data: {
+          userId: reg.userId,
+          scannedById: volunteerUserId || reg.userId,
+          gateName,
+        },
+      });
 
       return {
         status: 'CHECKED_IN',

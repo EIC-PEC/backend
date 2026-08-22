@@ -93,7 +93,7 @@ describe('AdminService', () => {
             email: 'rohan@pec.edu',
             phone: '9876543210',
             college: 'PEC',
-            role: Role.DELEGATE,
+            role: Role.USER,
           },
           payment: {
             orderId: 'order_1',
