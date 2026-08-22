@@ -1,0 +1,62 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: esummit_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: esummit
+      POSTGRES_PASSWORD: esummit_dev_password
+      POSTGRES_DB: esummit
+    ports:
+      - '5433:5432'
+    volumes:
+      - esummit_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U esummit -d esummit']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: esummit_redis
+    restart: unless-stopped
+    command: ['redis-server', '--appendonly', 'yes']
+    ports:
+      - '6380:6379'
+    volumes:
+      - esummit_redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: esummit_backend
+    restart: unless-stopped
+    command: ['node', 'dist/src/main']
+    ports:
+      - '4000:4000'
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://esummit:esummit_dev_password@postgres:5432/esummit?schema=public
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGINS: http://localhost:3000,http://localhost:3001
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-pec_summit_2026_jwt_access_secret_super_secure_key_123456789}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-pec_summit_2026_jwt_refresh_secret_super_secure_key_123456789}
+      QR_HMAC_SECRET: ${QR_HMAC_SECRET:-pec_summit_2026_qr_hmac_secret_super_secure_key_123456789}
+      SEED_DB: 'true'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+volumes:
+  esummit_pgdata:
+  esummit_redisdata:

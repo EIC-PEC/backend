@@ -1,0 +1,35 @@
+# Compiled output
+/dist
+/build
+.next/
+out/
+
+# Node modules
+node_modules/
+/node_modules
+admin_dashboard/node_modules/
+admin_dashboard/.next/
+
+# Environment variables & secrets
+.env
+.env.*
+.env*.local
+!.env.example
+
+# Logs & Coverage
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+coverage/
+
+# OS / Editor / TypeScript
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.tsbuildinfo
+
+# Stray files
+/main
+/10966943..2e39c046

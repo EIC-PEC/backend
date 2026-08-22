@@ -1,0 +1,322 @@
+// PEC Summit 2026 — E_Summit_Backend (MongoDB Prisma Schema)
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─── Auth & Role Enums ────────────────────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  ORGANIZER
+  VOLUNTEER_CHECKIN
+  INVESTOR
+  DELEGATE
+}
+
+enum PassType {
+  STUDENT_GENERAL
+  FOUNDER_PITCH
+  HACKATHON_BUILDER
+  CAMPUS_AMBASSADOR
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+// ─── User / Auth / Registration / Payment ────────────────────────────────────
+
+model User {
+  id                  String               @id @default(auto()) @map("_id") @db.ObjectId
+  email               String               @unique
+  passwordHash        String?
+  name                String
+  phone               String?
+  college             String?
+  gradYear            String?
+  city                String?
+  role                Role                 @default(DELEGATE)
+  referralCode        String?              @unique
+  referredById        String?              @db.ObjectId
+  referredBy          User?                @relation("CAReferrals", fields: [referredById], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  referrals           User[]               @relation("CAReferrals")
+  registrations       Registration[]
+  checkIns            CheckIn[]            @relation("AttendeeCheckIns")
+  scannedLogs         CheckIn[]            @relation("VolunteerScans")
+  refreshTokens       RefreshToken[]
+  passwordResetTokens PasswordResetToken[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  @@index([role])
+  @@index([referredById])
+}
+
+model RefreshToken {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  userAgent String?
+  ipAddress String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Registration {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  passId      String    @unique
+  userId      String    @db.ObjectId
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passType    PassType
+  amountPaid  Float     @default(0.0)
+  qrToken     String    @unique
+  paymentId   String?   @unique @db.ObjectId
+  payment     Payment?  @relation(fields: [paymentId], references: [id])
+  tracks      String[]
+  isCheckedIn Boolean   @default(false)
+  isRevoked   Boolean   @default(false)
+  revokedAt   DateTime?
+  revokedById String?   @db.ObjectId
+  badgePdfUrl String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([passType])
+}
+
+model Payment {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  orderId       String        @unique
+  transactionId String?       @unique
+  amount        Float
+  currency      String        @default("INR")
+  status        PaymentStatus @default(PENDING)
+  registration  Registration?
+  rawWebhookLog Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([status])
+}
+
+
+model CheckIn {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String   @db.ObjectId
+  user        User     @relation("AttendeeCheckIns", fields: [userId], references: [id])
+  scannedById String   @db.ObjectId
+  scannedBy   User     @relation("VolunteerScans", fields: [scannedById], references: [id])
+  gateName    String   @default("MAIN_GATE")
+  timestamp   DateTime @default(now())
+
+  @@index([userId])
+  @@index([timestamp])
+}
+
+// ─── CMS Content Models ───────────────────────────────────────────────────────
+
+/// Global site config — single row with id="global". Stores hero text, stats, contacts.
+model SiteConfig {
+  id               String   @id @default("global") @map("_id")
+  heroTitle        String   @default("PEC E-SUMMIT 2026")
+  heroSubtitle     String   @default("IGNITING ENTREPRENEURSHIP & INNOVATION")
+  summitDates      String   @default("MARCH 15–16, 2026")
+  summitVenue      String   @default("Punjab Engineering College, Sector 12, Chandigarh")
+  heroVideoUrl     String?
+  announcementText String?
+  announcementLink String?
+  /// JSON: { attendees: "3000+", speakers: "40+", prizePool: "₹15L+", editions: "7" }
+  stats            Json?
+  /// JSON: { faculty: [...], conveners: [...], emails: [...], location: "..." }
+  contacts         Json?
+  updatedAt        DateTime @updatedAt
+}
+
+/// Portfolio events — shown as horizontal scroll cards on homepage
+model Event {
+  id                    String   @id @default(auto()) @map("_id") @db.ObjectId
+  number                String   @default("01") // display number "01", "02"
+  title                 String
+  category              String   @default("General") // "Developer Arena", "Career Fair"
+  eyebrow               String   @default("") // "24-HOUR CODEATHON"
+  image                 String   @default("") // poster / cover image URL
+  purpose               String   @default("")
+  delivery              String   @default("")
+  expectedParticipation String   @default("")
+  tags                  String[] // ["AI & ML", "₹5.0L Cash Pool"]
+  partner               String?
+  registrationUrl       String?
+  // Schedule fields — used for Day 1/Day 2 agenda
+  type                  String   @default("general") // keynote | panel | competition | hackathon
+  track                 String?
+  day                   Int      @default(1)
+  startTime             String   @default("09:00")
+  endTime               String   @default("10:00")
+  venue                 String   @default("")
+  speakerIds            String[]
+  order                 Int      @default(0)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([day])
+  @@index([order])
+}
+
+model Speaker {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  title     String   // Full designation e.g. "Co-Founder & CEO, Lenskart"
+  role      String   @default("") // Short role e.g. "Co-Founder & CEO"
+  company   String   @default("")
+  badge     String   @default("") // "KEYNOTE SPEAKER"
+  category  String   @default("keynote") // keynote | panelist | investor | mentor
+  bio       String
+  track     String
+  avatarUrl String?
+  initials  String
+  color     String   @default("#7ED321")
+  linkedin  String?
+  twitter   String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+/// Day-by-day schedule items shown on Timeline section with Leaflet map
+model ScheduleItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  day       Int      // 1 or 2
+  date      String   // "MARCH 15, 2026"
+  time      String   // "09:30 AM"
+  title     String
+  tag       String   // "Main Stage", "Hacker Lab"
+  venueId   String   // key e.g. "main_stage"
+  venueName String
+  building  String
+  lat       Float
+  lng       Float
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([day])
+  @@index([order])
+}
+
+model Sponsor {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  tier       String   // "Title Sponsor" | "Powered By" | "Associate Sponsor" | "Ecosystem Partner"
+  logoUrl    String?
+  websiteUrl String?
+  category   String   @default("")
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([tier])
+  @@index([order])
+}
+
+model Alumni {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  batch       String
+  role        String
+  company     String
+  valuation   String?
+  achievement String
+  bio         String   @default("")
+  imageUrl    String?
+  linkedin    String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
+}
+
+model Faq {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  question  String
+  answer    String
+  category  String   @default("General") // "General" | "Passes" | "Hackathon" | "Pitch"
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([order])
+}
+
+model GalleryItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  title     String?
+  imageUrl  String
+  mediaType String   @default("IMAGE") // "IMAGE" | "VIDEO"
+  slot      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([slot])
+}
+
+model PortfolioEventItem {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  eventId   String   @unique
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─── Security & Audit ────────────────────────────────────────────────────────
+
+
+/// Immutable log of every admin mutation. Written by AuditInterceptor.
+model AuditLog {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String?  @db.ObjectId
+  userEmail  String?
+  action     String   // e.g. "CREATE", "UPDATE", "DELETE"
+  entity     String   // e.g. "Speaker", "Event", "Registration"
+  entityId   String?  // the PK of the affected record
+  method     String   // HTTP method: POST | PUT | PATCH | DELETE
+  path       String   // e.g. /api/v1/cms/speakers/abc123
+  statusCode Int?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+/// Time-limited tokens for the forgot-password flow. Stored as HMAC hash.
+model PasswordResetToken {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String    @db.ObjectId
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique // SHA-256 of the raw token sent to email
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
