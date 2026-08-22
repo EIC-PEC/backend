@@ -83,8 +83,9 @@ function inspectImageMagicBytes(buffer: Buffer): string | null {
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
 
 export class UploadBase64Dto {
+  @IsOptional()
   @IsString()
-  fileData!: string;
+  fileData?: string;
 
   @IsOptional()
   @IsString()

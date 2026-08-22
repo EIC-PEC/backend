@@ -6,6 +6,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Put,
   Query,
@@ -236,6 +237,12 @@ export class AlumniController {
   @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateAlumniDto>) {
+    return this.cms.updateAlumni(id, dto);
+  }
+
+  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Patch(':id')
+  async patch(@Param('id') id: string, @Body() dto: Partial<CreateAlumniDto>) {
     return this.cms.updateAlumni(id, dto);
   }
 

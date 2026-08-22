@@ -53,29 +53,31 @@ async function bootstrap(): Promise<void> {
   // ── CORS (#12) ────────────────────────────────────────────────────────────
   app.enableCors({
     origin: (origin, callback) => {
-      // In dev: allow all localhost ports and no-origin (curl, mobile apps).
-      if (!isProd) {
-        if (!origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
-          return callback(null, true);
-        }
-      }
-
-      // In production: no-origin requests are server-to-server — reject them
-      // from CORS perspective (they still reach the API but bypass origin header).
-      // Legitimate no-origin internal calls should come via trusted network, not CORS.
-      if (!origin) return callback(new Error('Origin header required in production'), false);
-
-      const allowed = config.get<string[]>('CORS_ORIGINS') || [];
-      if (allowed.includes(origin)) return callback(null, true);
-
-      // Also allow localhost in dev
-      if (!isProd && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin)) {
+      // No-origin requests (curl, server-to-server, SSR fetch)
+      if (!origin) {
         return callback(null, true);
       }
 
-      callback(new Error(`Origin ${origin} not allowed by CORS`));
+      // Always allow localhost, Vercel deployments (*.vercel.app), and official PEC domains
+      if (
+        /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin) ||
+        /\.vercel\.app$/.test(origin) ||
+        /pec\.ac\.in$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+
+      const allowed = config.get<string[]>('CORS_ORIGINS') || [];
+      if (allowed.includes(origin) || allowed.includes('*')) {
+        return callback(null, true);
+      }
+
+      // Permissive fallback for custom summit domains
+      return callback(null, true);
     },
-    credentials: true, // required for the HttpOnly refresh cookie
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin'],
   });
 
   app.useGlobalPipes(
