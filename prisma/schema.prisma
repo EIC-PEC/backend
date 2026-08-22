@@ -45,7 +45,7 @@ model User {
   gradYear            String?
   city                String?
   role                Role                 @default(DELEGATE)
-  referralCode        String?              @unique
+  referralCode        String?
   referredById        String?              @db.ObjectId
   referredBy          User?                @relation("CAReferrals", fields: [referredById], references: [id], onDelete: NoAction, onUpdate: NoAction)
   referrals           User[]               @relation("CAReferrals")
@@ -58,6 +58,7 @@ model User {
   updatedAt           DateTime             @updatedAt
 
   @@index([role])
+  @@index([referralCode])
   @@index([referredById])
 }
 
@@ -84,7 +85,7 @@ model Registration {
   passType    PassType
   amountPaid  Float     @default(0.0)
   qrToken     String    @unique
-  paymentId   String?   @unique @db.ObjectId
+  paymentId   String?   @db.ObjectId
   payment     Payment?  @relation(fields: [paymentId], references: [id])
   tracks      String[]
   isCheckedIn Boolean   @default(false)
@@ -97,21 +98,23 @@ model Registration {
 
   @@index([userId])
   @@index([passType])
+  @@index([paymentId])
 }
 
 model Payment {
   id            String        @id @default(auto()) @map("_id") @db.ObjectId
   orderId       String        @unique
-  transactionId String?       @unique
+  transactionId String?
   amount        Float
   currency      String        @default("INR")
   status        PaymentStatus @default(PENDING)
-  registration  Registration?
+  registrations Registration[]
   rawWebhookLog Json?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
   @@index([status])
+  @@index([transactionId])
 }
 
 
