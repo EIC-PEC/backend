@@ -15,6 +15,11 @@ enum Role {
   ADMIN
   GATE
   USER
+  SUPER_ADMIN
+  ORGANIZER
+  VOLUNTEER_CHECKIN
+  INVESTOR
+  DELEGATE
 }
 
 enum PassType {

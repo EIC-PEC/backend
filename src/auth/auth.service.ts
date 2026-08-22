@@ -112,9 +112,16 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    const effectiveRole: Role =
+      user.role === Role.ADMIN || (user.role as string) === 'SUPER_ADMIN' || (user.role as string) === 'ORGANIZER'
+        ? Role.ADMIN
+        : user.role === Role.GATE || (user.role as string) === 'VOLUNTEER_CHECKIN'
+          ? Role.GATE
+          : Role.USER;
+
     const { passwordHash: _discarded, ...publicUser } = user;
-    const tokens = await this.issueTokens(user.id, user.email, user.role, session);
-    return { user: publicUser, tokens };
+    const tokens = await this.issueTokens(user.id, user.email, effectiveRole, session);
+    return { user: { ...publicUser, role: effectiveRole }, tokens };
   }
 
   /**
