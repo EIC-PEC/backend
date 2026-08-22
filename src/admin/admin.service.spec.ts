@@ -3,9 +3,14 @@ import { PassType, PaymentStatus, Role } from '@prisma/client';
 import { NotFoundException } from '@nestjs/common';
 import { AdminService } from './admin.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 
 describe('AdminService', () => {
   let service: AdminService;
+
+  const mockEmailService = {
+    sendPassConfirmationEmail: jest.fn().mockResolvedValue(true),
+  };
 
   const mockPrismaService: any = {
     registration: {
@@ -37,6 +42,7 @@ describe('AdminService', () => {
       providers: [
         AdminService,
         { provide: PrismaService, useValue: mockPrismaService },
+        { provide: EmailService, useValue: mockEmailService },
       ],
     }).compile();
 

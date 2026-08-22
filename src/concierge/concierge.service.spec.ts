@@ -73,8 +73,8 @@ describe('ConciergeService', () => {
       expect(res.reply).toContain('PEC Summit 2026');
       expect(res.action).toEqual({
         type: 'navigate',
-        target: '/passes',
-        payload: { section: 'passes' },
+        target: '/register',
+        payload: { section: 'register' },
       });
       expect(res.source).toBe('festival_rag');
     });
@@ -88,8 +88,8 @@ describe('ConciergeService', () => {
       expect(res.reply).toContain('Schedule Highlights');
       expect(res.action).toEqual({
         type: 'navigate',
-        target: '/schedule',
-        payload: { section: 'schedule' },
+        target: '/#timeline',
+        payload: { section: 'timeline' },
       });
     });
 
@@ -102,8 +102,8 @@ describe('ConciergeService', () => {
       expect(res.reply).toContain('24-Hour Hackathon');
       expect(res.action).toEqual({
         type: 'navigate',
-        target: '/tracks',
-        payload: { section: 'tracks' },
+        target: '/#competitions',
+        payload: { section: 'competitions' },
       });
     });
 
@@ -116,7 +116,7 @@ describe('ConciergeService', () => {
       expect(res.reply).toContain('Dr. Sameer Roy');
       expect(res.action).toEqual({
         type: 'navigate',
-        target: '/speakers',
+        target: '/#speakers',
         payload: { section: 'speakers' },
       });
     });

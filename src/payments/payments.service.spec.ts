@@ -17,6 +17,7 @@ describe('PaymentsService', () => {
   const mockPrismaService: any = {
     registration: {
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       update: jest.fn(),
     },
     payment: {
@@ -24,9 +25,6 @@ describe('PaymentsService', () => {
       findUnique: jest.fn(),
       update: jest.fn(),
       updateMany: jest.fn(),
-    },
-    registration: {
-      findMany: jest.fn(),
     },
     $transaction: jest.fn(async (cb: any) => cb(mockPrismaService)),
   };
