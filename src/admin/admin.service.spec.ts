@@ -36,6 +36,9 @@ describe('AdminService', () => {
       groupBy: jest.fn(),
       findMany: jest.fn(),
     },
+    siteConfig: {
+      findFirst: jest.fn().mockResolvedValue({ stats: { attendees: '3000+' } }),
+    },
   };
 
   beforeEach(async () => {
