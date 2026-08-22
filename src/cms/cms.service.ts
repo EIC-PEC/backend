@@ -297,7 +297,7 @@ export class CmsService {
 
 
   async getBundle() {
-    const [siteConfig, events, speakers, scheduleItems, sponsors, alumni, faqs, gallery, portfolioMedia] =
+    const [siteConfig, rawEvents, speakers, scheduleItems, sponsors, alumni, faqs, gallery, portfolioMedia] =
       await Promise.all([
         this.getSiteConfig(),
         this.getEvents(),
@@ -309,6 +309,29 @@ export class CmsService {
         this.getGallery(),
         this.getPortfolioEventMedia(),
       ]);
+
+    const events = rawEvents.map((evt, idx) => {
+      const numStr = evt.number || `0${idx + 1}`.slice(-2);
+      const matched = portfolioMedia.find(
+        (p) =>
+          p.eventId === evt.id ||
+          p.eventId === numStr ||
+          (p.eventId === 'corporate-workshops' && (numStr === '01' || evt.title.includes('Workshop'))) ||
+          (p.eventId === 'internship-job-fair' && (numStr === '02' || evt.title.includes('Internship') || evt.title.includes('Career'))) ||
+          (p.eventId === 'rd-conclave' && (numStr === '03' || evt.title.includes('R&D'))) ||
+          (p.eventId === 'ipl-auction' && (numStr === '04' || evt.title.includes('IPL'))) ||
+          (p.eventId === 'ignite' && (numStr === '05' || evt.title.includes('Ignite'))) ||
+          (p.eventId === 'treasure-hunt' && (numStr === '06' || evt.title.includes('Treasure'))) ||
+          (p.eventId === 'baazar' && (numStr === '07' || evt.title.includes('Baazar'))) ||
+          (p.eventId === 'bizquiz-saasc' && (numStr === '08' || evt.title.includes('BizQuiz'))) ||
+          (p.eventId === 'additional-quiz-saasc' && (numStr === '09' || evt.title.includes('Knowledge Quiz'))) ||
+          (p.eventId === 'campus-ambassador' && (numStr === '10' || evt.title.includes('Ambassador'))) ||
+          (p.eventId === 'expert-speakers' && (numStr === '11' || evt.title.includes('Speaker'))) ||
+          (p.eventId === 'funding-conclave' && (numStr === '12' || evt.title.includes('Funding'))) ||
+          (p.eventId === 'case-competition' && (numStr === '13' || evt.title.includes('Case')))
+      );
+      return matched?.imageUrl ? { ...evt, image: matched.imageUrl } : evt;
+    });
 
     return { siteConfig, events, speakers, scheduleItems, sponsors, alumni, faqs, gallery, portfolioMedia };
   }
