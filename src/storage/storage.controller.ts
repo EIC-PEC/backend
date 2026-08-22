@@ -17,25 +17,33 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { IsOptional, IsString, MaxLength } from 'class-validator';
 
-/** Only these MIME types are accepted. Blocks SVG-with-JS, PHP disguised as images, etc. */
+/** Accepted image formats for media storage */
 const ALLOWED_MIME_TYPES = new Set([
   'image/jpeg',
   'image/png',
   'image/webp',
   'image/gif',
   'image/avif',
+  'image/svg+xml',
 ]);
 
 function inspectImageMagicBytes(buffer: Buffer): string | null {
-  if (!buffer || buffer.length < 12) return null;
+  if (!buffer || buffer.length < 4) return null;
+
+  // SVG: <?xml or <svg
+  const textHead = buffer.toString('utf8', 0, Math.min(buffer.length, 120)).trim().toLowerCase();
+  if (textHead.startsWith('<svg') || textHead.startsWith('<?xml') || textHead.includes('<svg')) {
+    return 'image/svg+xml';
+  }
 
   // JPEG: FF D8 FF
-  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
+  if (buffer.length >= 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
     return 'image/jpeg';
   }
 
   // PNG: 89 50 4E 47 0D 0A 1A 0A
   if (
+    buffer.length >= 8 &&
     buffer[0] === 0x89 &&
     buffer[1] === 0x50 &&
     buffer[2] === 0x4e &&
@@ -50,6 +58,7 @@ function inspectImageMagicBytes(buffer: Buffer): string | null {
 
   // GIF: GIF87a or GIF89a
   if (
+    buffer.length >= 6 &&
     buffer[0] === 0x47 &&
     buffer[1] === 0x49 &&
     buffer[2] === 0x46 &&
@@ -62,6 +71,7 @@ function inspectImageMagicBytes(buffer: Buffer): string | null {
 
   // WEBP: RIFF + WEBP
   if (
+    buffer.length >= 12 &&
     buffer.toString('ascii', 0, 4) === 'RIFF' &&
     buffer.toString('ascii', 8, 12) === 'WEBP'
   ) {
@@ -69,7 +79,7 @@ function inspectImageMagicBytes(buffer: Buffer): string | null {
   }
 
   // AVIF: ftyp with avif/avis/mif1 brand
-  if (buffer.toString('ascii', 4, 8) === 'ftyp') {
+  if (buffer.length >= 12 && buffer.toString('ascii', 4, 8) === 'ftyp') {
     const brand = buffer.toString('ascii', 8, 12);
     if (brand === 'avif' || brand === 'avis' || brand === 'mif1') {
       return 'image/avif';

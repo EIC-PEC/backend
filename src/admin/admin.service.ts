@@ -1,10 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PassType, PaymentStatus, Role } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
+import QRCode from 'qrcode';
 
 @Injectable()
 export class AdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  private readonly logger = new Logger(AdminService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService,
+  ) {}
 
   async getAnalytics() {
     const [
@@ -298,6 +305,125 @@ export class AdminService {
         email: updatedUser.email,
         role: updatedUser.role,
       },
+    };
+  }
+
+  // ── Audit Logs ────────────────────────────────────────────────────────────
+
+  async getAuditLogs(
+    page: number = 1,
+    limit: number = 30,
+    search?: string,
+    action?: string,
+    entity?: string,
+  ) {
+    const safeLimit = Math.max(1, Math.min(limit, 100));
+    const safePage = Math.max(1, page);
+    const skip = (safePage - 1) * safeLimit;
+    const where: any = {};
+
+    if (action && action !== 'ALL') {
+      where.action = action;
+    }
+
+    if (entity && entity !== 'ALL') {
+      where.entity = entity;
+    }
+
+    if (search && search.trim().length > 0) {
+      const q = search.trim();
+      where.OR = [
+        { userEmail: { contains: q, mode: 'insensitive' } },
+        { path: { contains: q, mode: 'insensitive' } },
+        { ipAddress: { contains: q, mode: 'insensitive' } },
+      ];
+    }
+
+    const [total, items] = await Promise.all([
+      this.prisma.auditLog.count({ where }),
+      this.prisma.auditLog.findMany({
+        where,
+        skip,
+        take: safeLimit,
+        orderBy: { createdAt: 'desc' },
+      }),
+    ]);
+
+    return {
+      page: safePage,
+      limit: safeLimit,
+      total,
+      totalPages: Math.ceil(total / safeLimit) || 1,
+      items,
+    };
+  }
+
+  // ── Full Attendees Export ──────────────────────────────────────────────────
+
+  async exportAllDelegates() {
+    const items = await this.prisma.registration.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: true,
+        payment: true,
+      },
+    });
+
+    return items.map((i) => ({
+      id: i.id,
+      passId: i.passId,
+      passType: i.passType,
+      amountPaid: i.amountPaid,
+      isCheckedIn: i.isCheckedIn,
+      isRevoked: i.isRevoked ?? false,
+      tracks: i.tracks,
+      createdAt: i.createdAt,
+      name: i.user.name,
+      email: i.user.email,
+      phone: i.user.phone || 'N/A',
+      college: i.user.college || 'N/A',
+      paymentStatus: i.payment?.status ?? 'SUCCESS',
+      orderId: i.payment?.orderId ?? 'N/A',
+      transactionId: i.payment?.transactionId ?? 'N/A',
+    }));
+  }
+
+  // ── Resend Pass Confirmation Email ────────────────────────────────────────
+
+  async resendPassEmail(registrationId: string) {
+    const registration = await this.prisma.registration.findUnique({
+      where: { id: registrationId },
+      include: { user: true, payment: true },
+    });
+
+    if (!registration) {
+      throw new NotFoundException(`Registration ${registrationId} not found.`);
+    }
+
+    if (!registration.user?.email) {
+      throw new BadRequestException('User has no registered email address.');
+    }
+
+    const qrDataUrl = await QRCode.toDataURL(registration.qrToken, {
+      width: 240,
+      margin: 2,
+    });
+
+    await this.emailService.sendPassConfirmationEmail({
+      to: registration.user.email,
+      recipientName: registration.user.name,
+      passId: registration.passId,
+      passType: registration.passType,
+      qrDataUrl,
+      college: registration.user.college ?? undefined,
+      amountPaid: registration.amountPaid,
+    });
+
+    this.logger.log(`Resent pass email for ${registration.passId} to ${registration.user.email}`);
+
+    return {
+      success: true,
+      message: `Pass confirmation email successfully resent to ${registration.user.email}`,
     };
   }
 }

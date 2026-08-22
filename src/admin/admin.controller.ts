@@ -67,6 +67,30 @@ export class AdminController {
     return this.adminService.updateUserRole(userId, role);
   }
 
+  @Get('delegates/export')
+  async exportAllDelegates() {
+    return this.adminService.exportAllDelegates();
+  }
+
+  @Post('delegates/:id/resend-pass')
+  @HttpCode(HttpStatus.OK)
+  async resendPassEmail(@Param('id') id: string) {
+    return this.adminService.resendPassEmail(id);
+  }
+
+  @Get('audit-logs')
+  async getAuditLogs(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+    @Query('action') action?: string,
+    @Query('entity') entity?: string,
+  ) {
+    const pageNum = page ? parseInt(page, 10) : 1;
+    const limitNum = limit ? parseInt(limit, 10) : 30;
+    return this.adminService.getAuditLogs(pageNum, limitNum, search, action, entity);
+  }
+
   @Roles(Role.SUPER_ADMIN)
   @Post('audit-logs/prune')
   @HttpCode(HttpStatus.OK)

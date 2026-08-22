@@ -287,6 +287,14 @@ model PortfolioEventItem {
   updatedAt DateTime @updatedAt
 }
 
+model Subscriber {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  email     String   @unique
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
 // ─── Security & Audit ────────────────────────────────────────────────────────
 
 

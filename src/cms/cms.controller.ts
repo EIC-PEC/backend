@@ -93,6 +93,12 @@ export class EventsController {
   }
 
   @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Patch(':id')
+  async patch(@Param('id') id: string, @Body() dto: Partial<CreateEventDto>) {
+    return this.cms.updateEvent(id, dto);
+  }
+
+  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -133,6 +139,12 @@ export class SpeakersController {
   }
 
   @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Patch(':id')
+  async patch(@Param('id') id: string, @Body() dto: Partial<CreateSpeakerDto>) {
+    return this.cms.updateSpeaker(id, dto);
+  }
+
+  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -167,6 +179,12 @@ export class ScheduleController {
   }
 
   @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Patch(':id')
+  async patch(@Param('id') id: string, @Body() dto: Partial<CreateScheduleItemDto>) {
+    return this.cms.updateScheduleItem(id, dto);
+  }
+
+  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
@@ -197,6 +215,12 @@ export class SponsorsController {
   @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateSponsorDto>) {
+    return this.cms.updateSponsor(id, dto);
+  }
+
+  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Patch(':id')
+  async patch(@Param('id') id: string, @Body() dto: Partial<CreateSponsorDto>) {
     return this.cms.updateSponsor(id, dto);
   }
 
@@ -277,6 +301,12 @@ export class FaqsController {
   @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateFaqDto>) {
+    return this.cms.updateFaq(id, dto);
+  }
+
+  @Roles(Role.ORGANIZER, Role.SUPER_ADMIN)
+  @Patch(':id')
+  async patch(@Param('id') id: string, @Body() dto: Partial<CreateFaqDto>) {
     return this.cms.updateFaq(id, dto);
   }
 

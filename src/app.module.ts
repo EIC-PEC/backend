@@ -13,6 +13,7 @@ import { CmsModule } from './cms/cms.module';
 import { ConciergeModule } from './concierge/concierge.module';
 import { AdminModule } from './admin/admin.module';
 import { StorageModule } from './storage/storage.module';
+import { SubscribersModule } from './subscribers/subscribers.module';
 import { EmailModule } from './email/email.module';
 import { HealthController } from './health/health.controller';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
@@ -47,6 +48,7 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
     ConciergeModule,
     AdminModule,
     StorageModule,
+    SubscribersModule,
   ],
 
   controllers: [HealthController],
