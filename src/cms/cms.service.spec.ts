@@ -72,7 +72,7 @@ describe('CmsService', () => {
       expect(events[0].title).toBe('Opening Ceremony');
       expect(mockPrismaService.event.findMany).toHaveBeenCalledWith({
         where: { day: 1 },
-        orderBy: [{ day: 'asc' }, { startTime: 'asc' }],
+        orderBy: [{ order: 'asc' }, { day: 'asc' }, { startTime: 'asc' }],
       });
     });
 

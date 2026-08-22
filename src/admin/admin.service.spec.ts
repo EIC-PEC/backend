@@ -23,6 +23,9 @@ describe('AdminService', () => {
     checkIn: {
       count: jest.fn(),
     },
+    event: {
+      count: jest.fn().mockResolvedValue(10),
+    },
     team: {
       count: jest.fn(),
     },
