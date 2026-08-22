@@ -44,8 +44,8 @@ export class ConciergeService {
     ) {
       action = {
         type: 'navigate',
-        target: '/passes',
-        payload: { section: 'passes' },
+        target: '/register',
+        payload: { section: 'register' },
       };
     } else if (
       queryLower.includes('schedule') ||
@@ -56,8 +56,8 @@ export class ConciergeService {
     ) {
       action = {
         type: 'navigate',
-        target: '/schedule',
-        payload: { section: 'schedule' },
+        target: '/#timeline',
+        payload: { section: 'timeline' },
       };
     } else if (
       queryLower.includes('speaker') ||
@@ -67,7 +67,7 @@ export class ConciergeService {
     ) {
       action = {
         type: 'navigate',
-        target: '/speakers',
+        target: '/#speakers',
         payload: { section: 'speakers' },
       };
     } else if (
@@ -78,8 +78,8 @@ export class ConciergeService {
     ) {
       action = {
         type: 'navigate',
-        target: '/tracks',
-        payload: { section: 'tracks' },
+        target: '/#competitions',
+        payload: { section: 'competitions' },
       };
     }
 
