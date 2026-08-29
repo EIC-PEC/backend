@@ -14,7 +14,7 @@ async function bootstrap(): Promise<void> {
   const logger = new Logger('Bootstrap');
   const isProd = config.get<string>('NODE_ENV') === 'production';
 
-  // ── Gzip / Deflate Compression (#FAANG Optimization) ───────────────────────
+  // Gzip / Brotli payload compression
   app.use(compression());
 
   // Enable strong ETag for instant 304 Not Modified cache validation
