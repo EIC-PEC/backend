@@ -126,18 +126,18 @@ async function main() {
 
   // ── Sponsors ──────────────────────────────────────────────────────────────
   const sponsors = [
-    { name: 'Google Cloud', tier: 'Title Sponsor', logoUrl: 'https://www.gstatic.com/devrel-devsite/prod/v0e0f589edd85502a40d78d7d0825db8ea5ef3b99ab4070381ee86977c9168730/cloud/images/social-icon-google-cloud-1200-630.png', websiteUrl: 'https://cloud.google.com', category: 'Cloud Infrastructure', order: 1 },
-    { name: 'GitHub', tier: 'Powered By', logoUrl: 'https://github.githubassets.com/images/modules/logos_page/GitHub-Logo.png', websiteUrl: 'https://github.com', category: 'Developer Ecosystem', order: 2 },
-    { name: 'Razorpay', tier: 'Associate Sponsor', logoUrl: 'https://razorpay.com/assets/razorpay-glyph.svg', websiteUrl: 'https://razorpay.com', category: 'Fintech Infrastructure', order: 3 },
-    { name: 'AWS Startups', tier: 'Associate Sponsor', logoUrl: 'https://a0.awsstatic.com/libra-css/images/logos/aws_logo_smile_1200x630.png', websiteUrl: 'https://aws.amazon.com/startups', category: 'Cloud Partner', order: 4 },
-    { name: 'Canva', tier: 'Design Partner', logoUrl: 'https://about.canva.com/wp-content/uploads/sites/8/2019/03/canva-logo.png', websiteUrl: 'https://canva.com', category: 'Creative Tools', order: 5 },
-    { name: 'Postman', tier: 'API Partner', logoUrl: 'https://assets.postman.com/brand/postman-logo-stacked.svg', websiteUrl: 'https://postman.com', category: 'API Platform', order: 6 },
-    { name: 'Notion', tier: 'Productivity Partner', logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png', websiteUrl: 'https://notion.so', category: 'Productivity', order: 7 },
-    { name: 'Figma', tier: 'Design Partner', logoUrl: 'https://cdn.sanity.io/images/599r6htc/regionalized/46a76c802176eb17b04e12108de7e7e0f3736dc6-1024x1024.png', websiteUrl: 'https://figma.com', category: 'Design Ecosystem', order: 8 },
-    { name: 'Vercel', tier: 'Ecosystem Partner', logoUrl: 'https://assets.vercel.com/image/upload/front/favicon/vercel/180x180.png', websiteUrl: 'https://vercel.com', category: 'Deployment', order: 9 },
-    { name: 'Supabase', tier: 'Database Partner', logoUrl: 'https://supabase.com/brand-assets/supabase-logo-icon.png', websiteUrl: 'https://supabase.com', category: 'Backend Platform', order: 10 },
-    { name: 'Polygon Labs', tier: 'Web3 Partner', logoUrl: 'https://cryptologos.cc/logos/polygon-matic-logo.png', websiteUrl: 'https://polygon.technology', category: 'Web3 & Blockchain', order: 11 },
-    { name: 'Zepto', tier: 'Quick Commerce Partner', logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/87/Zepto_Logo.png', websiteUrl: 'https://zeptonow.com', category: 'Retail & Delivery', order: 12 },
+    { name: 'Google Cloud', tier: 'Title Sponsor', logoUrl: 'https://cdn.simpleicons.org/googlecloud/white', websiteUrl: 'https://cloud.google.com', category: 'Cloud Infrastructure', order: 1 },
+    { name: 'GitHub', tier: 'Powered By', logoUrl: 'https://cdn.simpleicons.org/github/white', websiteUrl: 'https://github.com', category: 'Developer Ecosystem', order: 2 },
+    { name: 'Razorpay', tier: 'Associate Sponsor', logoUrl: 'https://cdn.simpleicons.org/razorpay/white', websiteUrl: 'https://razorpay.com', category: 'Fintech Infrastructure', order: 3 },
+    { name: 'AWS Startups', tier: 'Associate Sponsor', logoUrl: 'https://cdn.simpleicons.org/amazonwebservices/white', websiteUrl: 'https://aws.amazon.com/startups', category: 'Cloud Partner', order: 4 },
+    { name: 'Canva', tier: 'Design Partner', logoUrl: 'https://cdn.simpleicons.org/canva/white', websiteUrl: 'https://canva.com', category: 'Creative Tools', order: 5 },
+    { name: 'Postman', tier: 'API Partner', logoUrl: 'https://cdn.simpleicons.org/postman/white', websiteUrl: 'https://postman.com', category: 'API Platform', order: 6 },
+    { name: 'Notion', tier: 'Productivity Partner', logoUrl: 'https://cdn.simpleicons.org/notion/white', websiteUrl: 'https://notion.so', category: 'Productivity', order: 7 },
+    { name: 'Figma', tier: 'Design Partner', logoUrl: 'https://cdn.simpleicons.org/figma/white', websiteUrl: 'https://figma.com', category: 'Design Ecosystem', order: 8 },
+    { name: 'Vercel', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/vercel/white', websiteUrl: 'https://vercel.com', category: 'Deployment', order: 9 },
+    { name: 'Supabase', tier: 'Database Partner', logoUrl: 'https://cdn.simpleicons.org/supabase/white', websiteUrl: 'https://supabase.com', category: 'Backend Platform', order: 10 },
+    { name: 'Polygon Labs', tier: 'Web3 Partner', logoUrl: 'https://cdn.simpleicons.org/polygon/white', websiteUrl: 'https://polygon.technology', category: 'Web3 & Blockchain', order: 11 },
+    { name: 'Dribbble', tier: 'Creative Partner', logoUrl: 'https://cdn.simpleicons.org/dribbble/white', websiteUrl: 'https://dribbble.com', category: 'Design & Creative', order: 12 },
   ];
 
   for (const sp of sponsors) {
