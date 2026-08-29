@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
+import { CircuitBreaker } from '../common/resilience/circuit-breaker';
 
 export interface PassEmailPayload {
   to: string;
@@ -23,15 +24,22 @@ export class EmailService {
   private readonly logger = new Logger(EmailService.name);
   private readonly resend: Resend | null = null;
   private readonly fromEmail: string;
+  private readonly circuitBreaker: CircuitBreaker;
 
   constructor(private readonly config: ConfigService) {
     const apiKey = this.config.get<string>('RESEND_API_KEY');
     this.fromEmail =
       this.config.get<string>('MAIL_FROM') || 'PEC E-Summit 2026 <no-reply@esummit.pec.ac.in>';
 
+    this.circuitBreaker = new CircuitBreaker({
+      serviceName: 'ResendEmail',
+      failureThreshold: 5,
+      resetTimeoutMs: 30000,
+    });
+
     if (apiKey) {
       this.resend = new Resend(apiKey);
-      this.logger.log('Resend email provider initialized.');
+      this.logger.log('Resend email provider initialized with CircuitBreaker.');
     } else {
       this.logger.warn(
         'RESEND_API_KEY not configured. Outgoing emails will be logged to console in development.',
@@ -111,25 +119,27 @@ export class EmailService {
     `;
 
     if (this.resend) {
-      try {
-        const response = await this.resend.emails.send({
-          from: this.fromEmail,
-          to: [to],
-          subject: `Your E-Summit 2026 Digital Pass [${passId}]`,
-          html: htmlContent,
-        });
+      return this.circuitBreaker.execute(
+        async () => {
+          const response = await this.resend!.emails.send({
+            from: this.fromEmail,
+            to: [to],
+            subject: `Your E-Summit 2026 Digital Pass [${passId}]`,
+            html: htmlContent,
+          });
 
-        if (response.error) {
-          this.logger.error(`Resend API error sending pass to ${to}: ${response.error.message}`);
+          if (response.error) {
+            throw new Error(`Resend API error: ${response.error.message}`);
+          }
+
+          this.logger.log(`Pass confirmation email sent to ${to} (ID: ${response.data?.id})`);
+          return true;
+        },
+        async () => {
+          this.logger.warn(`[CIRCUIT FALLBACK] Logging email to console for ${to} [${passId}]`);
           return false;
-        }
-
-        this.logger.log(`Pass confirmation email sent to ${to} (ID: ${response.data?.id})`);
-        return true;
-      } catch (err: any) {
-        this.logger.error(`Failed to dispatch email to ${to}: ${err.message}`, err.stack);
-        return false;
-      }
+        },
+      );
     }
 
     // Development logging fallback
@@ -163,18 +173,24 @@ export class EmailService {
     `;
 
     if (this.resend) {
-      try {
-        const response = await this.resend.emails.send({
-          from: this.fromEmail,
-          to: [to],
-          subject: 'Reset your PEC E-Summit Account Password',
-          html: htmlContent,
-        });
-        return !response.error;
-      } catch (err: any) {
-        this.logger.error(`Failed to send password reset email to ${to}: ${err.message}`);
-        return false;
-      }
+      return this.circuitBreaker.execute(
+        async () => {
+          const response = await this.resend!.emails.send({
+            from: this.fromEmail,
+            to: [to],
+            subject: 'Reset your PEC E-Summit Account Password',
+            html: htmlContent,
+          });
+          if (response.error) {
+            throw new Error(`Resend API error: ${response.error.message}`);
+          }
+          return true;
+        },
+        async () => {
+          this.logger.warn(`[CIRCUIT FALLBACK] Password reset email fallback for ${to}`);
+          return false;
+        },
+      );
     }
 
     this.logger.log(`[DEV EMAIL DISPATCH] Password reset for ${to} -> ${resetUrl}`);

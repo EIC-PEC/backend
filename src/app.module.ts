@@ -21,6 +21,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { RolesGuard } from './common/guards/roles.guard';
 import { AuditInterceptor } from './common/interceptors/audit.interceptor';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { IdempotencyInterceptor } from './common/interceptors/idempotency.interceptor';
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ContentTypeMiddleware } from './common/middleware/content-type.middleware';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
@@ -61,6 +62,8 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
     { provide: APP_GUARD, useClass: ThrottlerGuard },
     // Observability & logging for every request
     { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+    // Idempotency check for data-modifying mutations
+    { provide: APP_INTERCEPTOR, useClass: IdempotencyInterceptor },
     // Writes an immutable audit row for every POST/PUT/PATCH/DELETE.
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
     // Maps Prisma error codes to clean HTTP errors — no schema leakage.

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import { json, urlencoded } from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
@@ -12,6 +13,12 @@ async function bootstrap(): Promise<void> {
   const config = app.get(ConfigService);
   const logger = new Logger('Bootstrap');
   const isProd = config.get<string>('NODE_ENV') === 'production';
+
+  // ── Gzip / Deflate Compression (#FAANG Optimization) ───────────────────────
+  app.use(compression());
+
+  // Enable strong ETag for instant 304 Not Modified cache validation
+  app.set('etag', 'strong');
 
   // 1MB cap for all JSON payloads. The upload route uses multipart — not JSON.
   app.use(json({ limit: '1mb' }));

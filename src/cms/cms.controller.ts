@@ -34,7 +34,7 @@ export class BundleController {
   constructor(private readonly cms: CmsService) {}
 
   @Public()
-  @Header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=600')
+  @Header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400')
   @Get()
   async getBundle() {
     return this.cms.getBundle();
