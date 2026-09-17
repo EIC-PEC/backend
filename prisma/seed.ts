@@ -44,26 +44,40 @@ async function main() {
       id: 'global',
       heroTitle: 'PEC E-SUMMIT 2026',
       heroSubtitle: 'IGNITING ENTREPRENEURSHIP & INNOVATION',
-      summitDates: 'MARCH 15–16, 2026',
+      summitDates: 'SEPTEMBER 26–27, 2026',
       summitVenue: 'Punjab Engineering College, Sector 12, Chandigarh',
-      stats: { attendees: '3000+', speakers: '40+', prizePool: '₹15L+', editions: '7' },
+      stats: { footfall: '2K+', startups: '100+', workshops: '50+', speakers: '30+', participation: '5K+', alumni: '1000+' },
       contacts: {
         faculty: [
           { role: 'Faculty Coordinator', name: 'Dr. Simranjit Singh', phone: '+91 98725 52898' },
           { role: 'Faculty Co-coordinator', name: 'Dr. Sudesh Rani', phone: '+91 98768 60085' },
         ],
         studentLeadership: [
-          { role: 'Student Convener', name: 'Simarpreet Kaur', phone: '+91 84271 46574' },
-          { role: 'Student Co-convener', name: 'Shubham Mangal', phone: '+91 78349 75811' },
-          { role: 'Student Co-convener', name: 'Vedansh Singh', phone: '+91 88268 73264' },
-          { role: 'Marketing Head', name: 'Japneet Pathania', phone: '+91 85449 18700' },
+          { role: 'Student Convener', name: 'Vansh Gupta', phone: '+91 90413 09108' },
+          { role: 'Student Convener', name: 'Bhrigu Verma', phone: '+91 94783 35331' },
         ],
         location:
-          'Entrepreneurship & Incubation Cell - Incubator (Near Siemens Lab), Punjab Engineering College, Sector-12 (160012), Chandigarh',
+          'Entrepreneurship & Incubation Cell (EIC), Punjab Engineering College, Sector-12 (160012), Chandigarh',
         emails: ['eicpec@pec.edu.in', 'esummitpr.pec@gmail.com'],
       },
     },
-    update: {},
+    update: {
+      summitDates: 'SEPTEMBER 26–27, 2026',
+      stats: { footfall: '2K+', startups: '100+', workshops: '50+', speakers: '30+', participation: '5K+', alumni: '1000+' },
+      contacts: {
+        faculty: [
+          { role: 'Faculty Coordinator', name: 'Dr. Simranjit Singh', phone: '+91 98725 52898' },
+          { role: 'Faculty Co-coordinator', name: 'Dr. Sudesh Rani', phone: '+91 98768 60085' },
+        ],
+        studentLeadership: [
+          { role: 'Student Convener', name: 'Vansh Gupta', phone: '+91 90413 09108' },
+          { role: 'Student Convener', name: 'Bhrigu Verma', phone: '+91 94783 35331' },
+        ],
+        location:
+          'Entrepreneurship & Incubation Cell (EIC), Punjab Engineering College, Sector-12 (160012), Chandigarh',
+        emails: ['eicpec@pec.edu.in', 'esummitpr.pec@gmail.com'],
+      },
+    },
   });
   console.log('  ✓ SiteConfig');
 
@@ -99,14 +113,26 @@ async function main() {
   }
   console.log(`  ✓ Events (${events.length})`);
 
-  // ── Speakers ──────────────────────────────────────────────────────────────
+  // ── Speakers (18 Authentic Brochure Speakers) ───────────────────────────
   const speakers = [
-    { name: 'Peyush Bansal', title: 'Co-Founder & CEO, Lenskart', role: 'Co-Founder & CEO', company: 'Lenskart', badge: 'KEYNOTE SPEAKER', category: 'keynote', bio: 'Peyush Bansal revolutionized D2C eyewear retail across Asia and has backed 50+ early-stage tech startups.', track: 'D2C & Retail Innovation', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', initials: 'PB', color: '#FF4D3D', order: 1 },
-    { name: 'Anupam Mittal', title: 'Founder & CEO, People Group', role: 'Founder & CEO', company: 'People Group (Shaadi.com)', badge: 'SHARK INVESTOR', category: 'investor', bio: 'Pioneer of consumer internet platforms in India and active angel investor in over 200+ technology companies.', track: 'Angel Syndicates & VC Scaling', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', initials: 'AM', color: '#9B5CFF', order: 2 },
-    { name: 'Dr. Ritesh Malik', title: 'Founder, Innov8 Coworking', role: 'Founder', company: 'Innov8 Coworking', badge: 'STARTUP MENTOR', category: 'mentor', bio: 'Doctor turned entrepreneur and ecosystem builder focused on prop-tech and healthcare innovation.', track: 'Zero to One Scaling', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'RM', color: '#3DD9FF', order: 3 },
-    { name: 'Gajendra Jangid', title: 'Co-Founder & CMO, CAR24', role: 'Co-Founder & CMO', company: 'CAR24', badge: 'PANELIST', category: 'panelist', bio: 'PEC Alumnus scaling auto-tech logistics across international markets.', track: 'Growth Strategy & Execution', avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80', initials: 'GJ', color: '#FF8C42', order: 4 },
-    { name: 'Upasana Taku', title: 'Co-Founder & COO, MobiKwik', role: 'Co-Founder & COO', company: 'MobiKwik', badge: 'FINTECH KEYNOTE', category: 'keynote', bio: 'Fintech pioneer leading digital payments infrastructure and financial inclusion for millions.', track: 'Fintech Infrastructure', avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80', initials: 'UT', color: '#FF4D3D', order: 5 },
-    { name: 'Kunwar Sachdev', title: 'Founder, Su-Kam Power Systems', role: 'Founder', company: 'Su-Kam Power Systems', badge: 'HARDWARE MENTOR', category: 'mentor', bio: 'Solar energy and hardware manufacturing pioneer in North India.', track: 'Hardware & CleanTech Manufacturing', avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=400&q=80', initials: 'KS', color: '#7ED321', order: 6 },
+    { name: 'Sandeep Jain', title: 'Founder, GeeksforGeeks', role: 'Founder', company: 'GeeksforGeeks', badge: 'EDTECH PIONEER', category: 'keynote', bio: 'Founder of GeeksforGeeks, one of the world’s largest computer science platforms empowering millions.', track: 'EdTech & Scaling Tech Platforms', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', initials: 'SJ', color: '#7ED321', order: 1 },
+    { name: 'Saurabh Munjal', title: 'Co-Founder & CEO, Lahori Zeera', role: 'Co-Founder & CEO', company: 'Lahori Zeera', badge: 'D2C SCALE LEADER', category: 'keynote', bio: 'Co-Founder & CEO of Lahori Zeera, revolutionizing traditional beverage FMCG distribution across India.', track: 'Consumer Brands & FMCG Scale', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', initials: 'SM', color: '#3DD9FF', order: 2 },
+    { name: 'Aditi Bhutia Madan', title: 'Founder, Momo Mami', role: 'Founder', company: 'Momo Mami', badge: 'SHARK TANK FOUNDER', category: 'panelist', bio: 'Shark Tank India featured founder, master chef, and entrepreneur scaling Momo Mami into a pan-India brand.', track: 'FoodTech & Women Entrepreneurship', avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80', initials: 'AM', color: '#FF8C42', order: 3 },
+    { name: 'Sourabh Goyal', title: 'Founder, SuccessBrew', role: 'Founder', company: 'SuccessBrew', badge: 'STARTUP ADVISOR', category: 'mentor', bio: 'Founder of SuccessBrew, active angel investor and mentor coaching early-stage founders.', track: 'Venture Building & Growth', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'SG', color: '#7ED321', order: 4 },
+    { name: 'Mandeep Kaur Tangra', title: 'Founder, SimbaQuartz', role: 'Founder', company: 'SimbaQuartz', badge: 'RURAL INNOVATOR', category: 'panelist', bio: 'Pioneered IT and technology empowerment in rural Punjab through SimbaQuartz, creating global software jobs.', track: 'Social Impact & Tech Empowerment', avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80', initials: 'MK', color: '#3DD9FF', order: 5 },
+    { name: 'Aahan Khurma', title: 'Co-Founder & CEO, Wellversed', role: 'Co-Founder & CEO', company: 'Wellversed', badge: 'HEALTH & NUTRITION', category: 'panelist', bio: 'Co-Founder & CEO of Wellversed, building Asia’s largest wellness house of brands.', track: 'D2C HealthTech & House of Brands', avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80', initials: 'AK', color: '#9B5CFF', order: 6 },
+    { name: 'Drishti Kharbanda', title: 'Founder, Bake Cosmetics', role: 'Founder', company: 'Bake Cosmetics', badge: 'BEAUTY & WELLNESS', category: 'panelist', bio: 'Founder of Bake Cosmetics, pioneering organic skincare and clean beauty formulations.', track: 'Consumer Goods & Digital Marketing', avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80', initials: 'DK', color: '#FF4D3D', order: 7 },
+    { name: 'Aseem Ghavri', title: 'Co-Founder, Third Unicorn', role: 'Co-Founder', company: 'Third Unicorn', badge: 'TECH OPERATOR', category: 'keynote', bio: 'Serial entrepreneur and Co-Founder at Third Unicorn building disruptive fintech and fantasy tech products.', track: 'Fintech & Zero to One Ventures', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80', initials: 'AG', color: '#9B5CFF', order: 8 },
+    { name: 'Varun Singla', title: 'Founder, Gate Smashers', role: 'Founder', company: 'Gate Smashers', badge: 'TOP EDUCATOR', category: 'keynote', bio: 'Founder of Gate Smashers, India’s most popular computer science lecture channel mentoring 1.5M+ engineers.', track: 'Engineering Education & Content Scale', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', initials: 'VS', color: '#FF4D3D', order: 9 },
+    { name: 'Sarvjeet Singh', title: 'Founder, Finvasia', role: 'Founder', company: 'Finvasia', badge: 'FINTECH TITAN', category: 'investor', bio: 'Founder of Finvasia and Shoonya, leading multinational financial conglomerate operating across trading and banking.', track: 'Global Capital & Algorithmic Trading', avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80', initials: 'SS', color: '#7ED321', order: 10 },
+    { name: 'Paresh Gupta', title: 'Founder, CUETPro / GSEC / Brevity', role: 'Founder', company: 'CUETPro / GSEC', badge: 'ECOSYSTEM STRATEGIST', category: 'mentor', bio: '4x TEDx Speaker, serial entrepreneur, and mentor shaping incubation ecosystems.', track: 'Startup Valuation & Incubation', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'PG', color: '#3DD9FF', order: 11 },
+    { name: 'Sharad Sagar', title: 'Founder & CEO, Dexterity Global', role: 'Founder & CEO', company: 'Dexterity Global', badge: 'GLOBAL LEADER', category: 'keynote', bio: 'Forbes 30 Under 30, Rockefeller Foundation Fellow transforming youth leadership across India.', track: 'Global Leadership & Public Good', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', initials: 'SS', color: '#7ED321', order: 12 },
+    { name: 'Paritosh Anand', title: 'Founder, WeSmile / Believe Clothing', role: 'Founder', company: 'WeSmile / Believe Clothing', badge: 'CREATOR ECONOMY', category: 'panelist', bio: 'Storyteller, founder of Believe Clothing and WeSmile media inspiring young creators.', track: 'Creator Economy & Brand Storytelling', avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80', initials: 'PA', color: '#FF8C42', order: 13 },
+    { name: 'Aditya Arora', title: 'Android Lead, SAP', role: 'Android Lead', company: 'SAP', badge: 'TECH ARCHITECT', category: 'panelist', bio: 'Android Lead at SAP, angel investor in 25+ tech startups, and Microsoft MVP.', track: 'Enterprise Tech & Angel Investing', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80', initials: 'AA', color: '#3DD9FF', order: 14 },
+    { name: 'Nandu Nandkishore', title: 'Former Global CEO, Nestlé Nutrition', role: 'Former Global CEO', company: 'Nestlé Nutrition', badge: 'FORTUNE 500 LEADER', category: 'keynote', bio: 'Former Executive Board Member at Nestlé S.A. and Global CEO of Nestlé Nutrition.', track: 'Global Scale & Corporate Governance', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', initials: 'NN', color: '#FF4D3D', order: 15 },
+    { name: 'Daksh Sethi', title: 'Founder & CEO, Guby Rogers', role: 'Founder & CEO', company: 'Guby Rogers', badge: 'YOUTH CATALYST', category: 'panelist', bio: 'Founder of Guby Rogers, keynote speaker, and soft skills accelerator.', track: 'Personal Branding & Career Velocity', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'DS', color: '#7ED321', order: 16 },
+    { name: 'Hardik Banga', title: 'Co-Founder, Adsworm', role: 'Co-Founder', company: 'Adsworm', badge: 'PERFORMANCE MEDIA', category: 'mentor', bio: 'Co-Founder of Adsworm, performance marketing strategist and digital media accelerator.', track: 'Growth Hacking & Ad Networks', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', initials: 'HB', color: '#3DD9FF', order: 17 },
+    { name: 'Rupinder Singh', title: 'Founder, Bio House / Mentor / Investor', role: 'Founder', company: 'Bio House', badge: 'ANGEL INVESTOR', category: 'investor', bio: 'Founder of Bio House, seasoned life sciences investor and startup mentor.', track: 'BioTech & Seed Stage Deals', avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80', initials: 'RS', color: '#9B5CFF', order: 18 },
   ];
 
   for (const sp of speakers) {
@@ -124,20 +150,30 @@ async function main() {
   }
   console.log(`  ✓ Speakers (${speakers.length})`);
 
-  // ── Sponsors ──────────────────────────────────────────────────────────────
+  // ── Sponsors (22 Authentic Brochure Partners) ───────────────────────────
   const sponsors = [
-    { name: 'Google Cloud', tier: 'Title Sponsor', logoUrl: 'https://cdn.simpleicons.org/googlecloud/white', websiteUrl: 'https://cloud.google.com', category: 'Cloud Infrastructure', order: 1 },
-    { name: 'GitHub', tier: 'Powered By', logoUrl: 'https://cdn.simpleicons.org/github/white', websiteUrl: 'https://github.com', category: 'Developer Ecosystem', order: 2 },
-    { name: 'Razorpay', tier: 'Associate Sponsor', logoUrl: 'https://cdn.simpleicons.org/razorpay/white', websiteUrl: 'https://razorpay.com', category: 'Fintech Infrastructure', order: 3 },
-    { name: 'AWS Startups', tier: 'Associate Sponsor', logoUrl: 'https://cdn.simpleicons.org/amazonwebservices/white', websiteUrl: 'https://aws.amazon.com/startups', category: 'Cloud Partner', order: 4 },
-    { name: 'Canva', tier: 'Design Partner', logoUrl: 'https://cdn.simpleicons.org/canva/white', websiteUrl: 'https://canva.com', category: 'Creative Tools', order: 5 },
-    { name: 'Postman', tier: 'API Partner', logoUrl: 'https://cdn.simpleicons.org/postman/white', websiteUrl: 'https://postman.com', category: 'API Platform', order: 6 },
-    { name: 'Notion', tier: 'Productivity Partner', logoUrl: 'https://cdn.simpleicons.org/notion/white', websiteUrl: 'https://notion.so', category: 'Productivity', order: 7 },
-    { name: 'Figma', tier: 'Design Partner', logoUrl: 'https://cdn.simpleicons.org/figma/white', websiteUrl: 'https://figma.com', category: 'Design Ecosystem', order: 8 },
-    { name: 'Vercel', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/vercel/white', websiteUrl: 'https://vercel.com', category: 'Deployment', order: 9 },
-    { name: 'Supabase', tier: 'Database Partner', logoUrl: 'https://cdn.simpleicons.org/supabase/white', websiteUrl: 'https://supabase.com', category: 'Backend Platform', order: 10 },
-    { name: 'Polygon Labs', tier: 'Web3 Partner', logoUrl: 'https://cdn.simpleicons.org/polygon/white', websiteUrl: 'https://polygon.technology', category: 'Web3 & Blockchain', order: 11 },
-    { name: 'Dribbble', tier: 'Creative Partner', logoUrl: 'https://cdn.simpleicons.org/dribbble/white', websiteUrl: 'https://dribbble.com', category: 'Design & Creative', order: 12 },
+    { name: 'Finvasia', tier: 'Title Sponsor', logoUrl: 'https://cdn.simpleicons.org/f-secure/white', websiteUrl: '#', category: 'Fintech & Trading', order: 1 },
+    { name: 'SBI (State Bank of India)', tier: 'Powered By', logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/cc/SBI-Logo.svg', websiteUrl: '#', category: 'Banking Partner', order: 2 },
+    { name: 'Fireside Ventures', tier: 'Associate Sponsor', logoUrl: 'https://cdn.simpleicons.org/firefoxbrowser/white', websiteUrl: '#', category: 'Venture Capital', order: 3 },
+    { name: 'Amar Ujala', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/newsblur/white', websiteUrl: '#', category: 'Media Partner', order: 4 },
+    { name: 'CII (Confederation of Indian Industry)', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/civic/white', websiteUrl: '#', category: 'Industry Partner', order: 5 },
+    { name: 'uTrade', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/trademarked/white', websiteUrl: '#', category: 'Algorithmic Trading', order: 6 },
+    { name: 'Monster Energy', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/monster/white', websiteUrl: '#', category: 'Energy Drink Partner', order: 7 },
+    { name: 'Vivo', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/vivo/white', websiteUrl: '#', category: 'Smartphone Partner', order: 8 },
+    { name: 'Chiratae Ventures', tier: 'Associate Sponsor', logoUrl: 'https://cdn.simpleicons.org/chartdotjs/white', websiteUrl: '#', category: 'Venture Capital', order: 9 },
+    { name: 'Shree Ganesh (South Indian Food)', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/googlehangouts/white', websiteUrl: '#', category: 'Food Partner', order: 10 },
+    { name: 'Shoutlo', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/speakerdeck/white', websiteUrl: '#', category: 'Local Discovery', order: 11 },
+    { name: 'Young Indians (Yi)', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/youtubekids/white', websiteUrl: '#', category: 'Youth Leadership', order: 12 },
+    { name: 'Dainik Bhaskar', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/dailymotion/white', websiteUrl: '#', category: 'Print Media', order: 13 },
+    { name: 'CityWoofer', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/woocommerce/white', websiteUrl: '#', category: 'Ticketing & Events', order: 14 },
+    { name: 'Venture Wolf', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/wolfram/white', websiteUrl: '#', category: 'Startup Accelerator', order: 15 },
+    { name: "Victoria's Cafe", tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/vlcmediaplayer/white', websiteUrl: '#', category: 'Hospitality', order: 16 },
+    { name: 'JAL', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/japanairlines/white', websiteUrl: '#', category: 'Hydration Partner', order: 17 },
+    { name: 'CITCO', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/cisco/white', websiteUrl: '#', category: 'Tourism Partner', order: 18 },
+    { name: 'Smaaash', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/smashdotgg/white', websiteUrl: '#', category: 'Gaming & Entertainment', order: 19 },
+    { name: 'Decathlon Play', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/decathlon/white', websiteUrl: '#', category: 'Sports & Active', order: 20 },
+    { name: 'Shoonya', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/shazam/white', websiteUrl: '#', category: 'Zero-Brokerage Trading', order: 21 },
+    { name: 'Rebel Foods', tier: 'Ecosystem Partner', logoUrl: 'https://cdn.simpleicons.org/foodpanda/white', websiteUrl: '#', category: 'Cloud Kitchen Partner', order: 22 },
   ];
 
   for (const sp of sponsors) {
@@ -155,8 +191,44 @@ async function main() {
   }
   console.log(`  ✓ Sponsors (${sponsors.length})`);
 
-  // ── Alumni ────────────────────────────────────────────────────────────────
+  // ── Alumni (Including PEC Legends: Kalpana Chawla, Satish Dhawan, Jaspal Bhatti)
   const alumni = [
+    {
+      name: 'Kalpana Chawla',
+      batch: "PEC '82",
+      role: 'Astronaut & Aerospace Pioneer',
+      company: 'NASA',
+      valuation: 'Congressional Space Medal of Honor',
+      achievement: 'First Indian-Born Woman in Space',
+      bio: 'Pioneering astronaut and aeronautical engineer who inspired generations of innovators and space explorers worldwide.',
+      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
+      linkedin: 'https://linkedin.com/company/ecell-pec',
+      order: 1,
+    },
+    {
+      name: 'Satish Dhawan',
+      batch: "PEC '38",
+      role: 'Former Chairman',
+      company: 'ISRO',
+      valuation: 'Father of Indian Fluid Dynamics',
+      achievement: 'Architect of India’s Space Program',
+      bio: 'Legendary aerospace scientist who spearheaded India’s indigenous space launch vehicle and satellite programs.',
+      imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80',
+      linkedin: 'https://linkedin.com/company/ecell-pec',
+      order: 2,
+    },
+    {
+      name: 'Jaspal Bhatti',
+      batch: "PEC '78",
+      role: 'Iconic Satirist & Media Pioneer',
+      company: 'Flop Show & Media Studio',
+      valuation: 'Padma Bhushan Awardee',
+      achievement: 'PEC Electrical Engineering Alum',
+      bio: 'Legendary satirist, filmmaker, and cultural icon who pioneered independent broadcast television in India.',
+      imageUrl: 'https://images.unsplash.com/photo-1463453091185-61582044d556?auto=format&fit=crop&w=800&q=80',
+      linkedin: 'https://linkedin.com/company/ecell-pec',
+      order: 3,
+    },
     {
       name: 'Gajendra Jangid',
       batch: "PEC '05",
@@ -167,7 +239,7 @@ async function main() {
       bio: 'Pioneered auto-tech logistics in India, scaling CARS24 from a seed idea to a multi-billion dollar international marketplace.',
       imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
       linkedin: 'https://linkedin.com/company/ecell-pec',
-      order: 1,
+      order: 4,
     },
     {
       name: 'Padmasree Warrior',
@@ -179,7 +251,7 @@ async function main() {
       bio: 'Global technology icon. Served as Chief Technology Officer at Cisco and Motorola, currently leading digital reading platform Fable.',
       imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
       linkedin: 'https://linkedin.com/company/ecell-pec',
-      order: 2,
+      order: 5,
     },
     {
       name: 'Steve Sanghi',
@@ -191,7 +263,7 @@ async function main() {
       bio: 'Transformed Microchip Technology from near-bankruptcy into a global semiconductor leader with 30+ consecutive years of profitability.',
       imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
       linkedin: 'https://linkedin.com/company/ecell-pec',
-      order: 3,
+      order: 6,
     },
     {
       name: 'Kunwar Sachdev',
@@ -203,7 +275,7 @@ async function main() {
       bio: 'Revolutionized power backup and solar renewable systems across South Asia, Africa, and the Middle East.',
       imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=800&q=80',
       linkedin: 'https://linkedin.com/company/ecell-pec',
-      order: 4,
+      order: 7,
     },
     {
       name: 'Dr. Ritesh Malik',
@@ -215,19 +287,7 @@ async function main() {
       bio: 'Doctor turned serial entrepreneur and startup ecosystem builder. Scaled Innov8 to exit and actively mentors student founders across India.',
       imageUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80',
       linkedin: 'https://linkedin.com/company/ecell-pec',
-      order: 5,
-    },
-    {
-      name: 'Jaspal Bhatti',
-      batch: "PEC '78",
-      role: 'Satirist & Media Pioneer',
-      company: 'Flop Show & Media Studio',
-      valuation: 'Padma Bhushan Awardee',
-      achievement: 'PEC Electrical Engineering Alum',
-      bio: 'Legendary satirist, filmmaker, and cultural icon who pioneered independent broadcast television and creative media production in India.',
-      imageUrl: 'https://images.unsplash.com/photo-1463453091185-61582044d556?auto=format&fit=crop&w=800&q=80',
-      linkedin: 'https://linkedin.com/company/ecell-pec',
-      order: 6,
+      order: 8,
     },
     {
       name: 'Prof. Vijay K. Dhir',
@@ -239,7 +299,7 @@ async function main() {
       bio: 'Renowned researcher in thermal sciences and space shuttle heat-shield physics. Led UCLA Engineering to top-tier global research ranking.',
       imageUrl: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=800&q=80',
       linkedin: 'https://linkedin.com/company/ecell-pec',
-      order: 7,
+      order: 9,
     },
     {
       name: 'D.C. Anand',
@@ -251,7 +311,7 @@ async function main() {
       bio: 'Pioneered precision automotive component manufacturing in India, building a conglomerate of 19 companies partnering with global OEMs.',
       imageUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=800&q=80',
       linkedin: 'https://linkedin.com/company/ecell-pec',
-      order: 8,
+      order: 10,
     },
   ];
 
