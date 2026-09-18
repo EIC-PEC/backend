@@ -22,8 +22,12 @@ export class CmsService {
     private readonly cacheService: CacheService,
   ) {}
 
-  private invalidateCmsCache() {
-    this.cacheService.invalidatePrefix('cms:');
+  private invalidateCmsCache(entity?: string) {
+    if (entity) {
+      this.cacheService.invalidatePrefix(`cms:${entity}`);
+    } else {
+      this.cacheService.invalidatePrefix('cms:');
+    }
   }
 
   // ── SiteConfig (single row, id = "global") ───────────────────────────────
@@ -49,7 +53,7 @@ export class CmsService {
       create: { id: 'global', ...(data as Prisma.SiteConfigCreateInput) },
       update: data,
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('config');
     return res;
   }
 
@@ -64,6 +68,7 @@ export class CmsService {
       if (type) where.type = type;
       return this.prisma.event.findMany({
         where,
+        take: 1000,
         orderBy: [{ order: 'asc' }, { day: 'asc' }, { startTime: 'asc' }],
       });
     });
@@ -99,7 +104,7 @@ export class CmsService {
         order: dto.order ?? 0,
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('events');
     return res;
   }
 
@@ -133,14 +138,14 @@ export class CmsService {
         ...(dto.order !== undefined && { order: dto.order }),
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('events');
     return res;
   }
 
   async deleteEvent(id: string) {
     await this.getEventById(id);
     const res = await this.prisma.event.delete({ where: { id } });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('events');
     return res;
   }
 
@@ -152,6 +157,7 @@ export class CmsService {
       const where = category ? { category } : {};
       return this.prisma.speaker.findMany({
         where,
+        take: 1000,
         orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
       });
     });
@@ -182,7 +188,7 @@ export class CmsService {
         order: dto.order ?? 0,
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('speakers');
     return res;
   }
 
@@ -207,14 +213,31 @@ export class CmsService {
         ...(dto.order !== undefined && { order: dto.order }),
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('speakers');
     return res;
   }
 
   async deleteSpeaker(id: string) {
     await this.getSpeakerById(id);
-    const res = await this.prisma.speaker.delete({ where: { id } });
-    this.invalidateCmsCache();
+
+    // Relational Scrubbing: Remove this speaker from any Event that references them
+    const affectedEvents = await this.prisma.event.findMany({
+      where: { speakerIds: { has: id } }
+    });
+
+    const updatePromises = affectedEvents.map(event =>
+      this.prisma.event.update({
+        where: { id: event.id },
+        data: { speakerIds: event.speakerIds.filter(sId => sId !== id) }
+      })
+    );
+
+    const [res] = await this.prisma.$transaction([
+      this.prisma.speaker.delete({ where: { id } }),
+      ...updatePromises
+    ]);
+
+    this.invalidateCmsCache('speakers');
     return res;
   }
 
@@ -226,6 +249,7 @@ export class CmsService {
       const where = tier ? { tier } : {};
       return this.prisma.sponsor.findMany({
         where,
+        take: 1000,
         orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
       });
     });
@@ -242,7 +266,7 @@ export class CmsService {
         order: dto.order ?? 0,
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('sponsors');
     return res;
   }
 
@@ -260,13 +284,13 @@ export class CmsService {
         ...(dto.order !== undefined && { order: dto.order }),
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('sponsors');
     return res;
   }
 
   async deleteSponsor(id: string) {
     const res = await this.prisma.sponsor.delete({ where: { id } });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('sponsors');
     return res;
   }
 
@@ -275,6 +299,7 @@ export class CmsService {
   async getAlumni() {
     return this.cacheService.getOrSet('cms:alumni', CMS_CACHE_TTL_SECONDS, async () => {
       return this.prisma.alumni.findMany({
+        take: 1000,
         orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
       });
     });
@@ -301,7 +326,7 @@ export class CmsService {
         order: dto.order ?? 0,
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('alumni');
     return res;
   }
 
@@ -322,14 +347,14 @@ export class CmsService {
         ...(dto.order !== undefined && { order: dto.order }),
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('alumni');
     return res;
   }
 
   async deleteAlumni(id: string) {
     await this.getAlumniById(id);
     const res = await this.prisma.alumni.delete({ where: { id } });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('alumni');
     return res;
   }
 
@@ -341,6 +366,7 @@ export class CmsService {
       const where = category ? { category } : {};
       return this.prisma.faq.findMany({
         where,
+        take: 1000,
         orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
       });
     });
@@ -355,7 +381,7 @@ export class CmsService {
         order: dto.order ?? 0,
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('faqs');
     return res;
   }
 
@@ -369,13 +395,13 @@ export class CmsService {
         ...(dto.order !== undefined && { order: dto.order }),
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('faqs');
     return res;
   }
 
   async deleteFaq(id: string) {
     const res = await this.prisma.faq.delete({ where: { id } });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('faqs');
     return res;
   }
 
@@ -387,6 +413,7 @@ export class CmsService {
       const where = day !== undefined ? { day } : {};
       return this.prisma.scheduleItem.findMany({
         where,
+        take: 1000,
         orderBy: [{ day: 'asc' }, { order: 'asc' }, { time: 'asc' }],
       });
     });
@@ -408,7 +435,7 @@ export class CmsService {
         order: dto.order ?? 0,
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('schedule');
     return res;
   }
 
@@ -429,13 +456,13 @@ export class CmsService {
         ...(dto.order !== undefined && { order: dto.order }),
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('schedule');
     return res;
   }
 
   async deleteScheduleItem(id: string) {
     const res = await this.prisma.scheduleItem.delete({ where: { id } });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('schedule');
     return res;
   }
 
@@ -458,7 +485,7 @@ export class CmsService {
         slot: dto.slot ?? 0,
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('gallery');
     return res;
   }
 
@@ -472,13 +499,13 @@ export class CmsService {
         ...(dto.slot !== undefined && { slot: dto.slot }),
       },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('gallery');
     return res;
   }
 
   async deleteGalleryItem(id: string) {
     const res = await this.prisma.galleryItem.delete({ where: { id } });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('gallery');
     return res;
   }
 
@@ -496,13 +523,13 @@ export class CmsService {
       update: { imageUrl: imageUrl.trim() },
       create: { eventId, imageUrl: imageUrl.trim() },
     });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('portfolio_media');
     return res;
   }
 
   async deletePortfolioEventImage(eventId: string) {
     const res = await this.prisma.portfolioEventItem.deleteMany({ where: { eventId } });
-    this.invalidateCmsCache();
+    this.invalidateCmsCache('portfolio_media');
     return res;
   }
 
