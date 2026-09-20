@@ -1,118 +1,147 @@
-# E_Summit_Backend
+# E-Summit 2026 — Backend API Engine
 
-Production API and data engine for **PEC Summit 2026** (E-Cell PEC, Chandigarh).
+[![NestJS](https://img.shields.io/badge/NestJS-10.4-E0234E?style=for-the-badge&logo=nestjs&logoColor=white)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.2+-2D3748?style=for-the-badge&logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas_%2F_6.0+-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
 
-Implements [`BACKEND_IMPLEMENTATION_PLAN.md`](./BACKEND_IMPLEMENTATION_PLAN.md) and [`ADMIN_DASHBOARD_PLAN.md`](./ADMIN_DASHBOARD_PLAN.md). It powers the `ESUMMIT` public site and the `esummit-admin` operations portal.
-
-## Status
-
-All core modules are built, type-checked, and integrated.
-
-| Plan Section | Module | Status | Notes |
-| :--- | :--- | :--- | :--- |
-| §3 Database Schema | Prisma PostgreSQL & pgvector | ✅ Complete | Migrated schema with relations & indexes |
-| §4.1 Auth & Users | `src/auth/` | ✅ Complete | register / login / refresh / logout / me + JWT Rotation |
-| §5.3 Rate Limiting | `src/app.module.ts` | ✅ Complete | In-memory token bucket + Redis-ready throttler |
-| §4.2 Registrations & Passes | `src/registrations/` | ✅ Complete | `PEC-XXXXXX` ID generation & cryptographic QR |
-| §4.3 Payments & Razorpay | `src/payments/` | ✅ Complete | Razorpay Orders, Signatures & Webhooks |
-| §4.4 Gate Check-in (HMAC QR) | `src/checkin/` | ✅ Complete | HMAC-SHA256 verification & replay prevention |
-| §4.5 Teams & Submissions | `src/teams/` | ✅ Complete | Hackathon/Pitch teams (`HACK-XXXX`), Jury 1-10 Rubric |
-| §4.6 AI Concierge RAG | `src/concierge/` | ✅ Complete | Grounded festival chat + UI Action Directives |
-| CMS & Schedule Content | `src/cms/` | ✅ Complete | Events (Day 1 & 2), Speakers, Sponsors, Newsletter |
-| Admin Command Center | `src/admin/` | ✅ Complete | Real-time analytics, datatable, CA Leaderboard |
-| Database Seeder | `prisma/seed.ts` | ✅ Complete | Seeded with all `ESUMMIT` speakers & events |
-
-## Tech Stack
-
-NestJS 10 · TypeScript · Prisma 6 · PostgreSQL 16 (pgvector) · Redis 7 · Passport JWT · Argon2 · Zod · Class Validator
-
-## Quick Start
-
-Requires Node.js 18+ and Docker.
-
-```bash
-# 1. Start all containers (Postgres + Redis + Backend)
-docker compose up -d --build
-
-# 2. Or run locally:
-npm install
-npm run infra:up          # Postgres :5433 + Redis :6380
-npx prisma migrate dev    # Apply Prisma schema migrations
-npm run db:seed           # Populate with initial fest schedule & accounts
-npm run start:dev         # Start server at http://localhost:4000/api/v1
-```
-
-Verify backend health:
-
-```bash
-curl http://localhost:4000/api/v1/health
-```
-
-## API Route Directory
-
-All routes are prefixed with `/api/v1`.
-
-### 1. Authentication (`/api/v1/auth`)
-- `POST /auth/register` (Public) — User registration.
-- `POST /auth/login` (Public) — Login with email/password, sets HTTP-only refresh cookie, returns short-lived JWT.
-- `POST /auth/refresh` (Public) — Rotates refresh token cookie and issues new JWT.
-- `POST /auth/logout` (Public) — Revokes refresh session and clears cookie.
-- `GET  /auth/me` (Bearer) — Current user profile.
-
-### 2. Registrations & Passes (`/api/v1/registrations`)
-- `GET  /registrations/types` (Public) — Pass catalog, fees, and live availability.
-- `POST /registrations/create` (Public/Bearer) — Creates pass with unique `PEC-XXXXXX` and HMAC-SHA256 `qrToken`.
-- `GET  /registrations/my-passes` (Bearer) — Current user's digital passes and QR codes.
-- `GET  /registrations/:passId` (Public/Bearer) — Pass lookup.
-
-### 3. Payments (`/api/v1/payments`)
-- `POST /payments/create-order` (Public) — Initializes Razorpay order for pending pass.
-- `POST /payments/verify` (Public) — Verifies Razorpay transaction signature.
-- `POST /payments/webhook` (Public) — Razorpay webhook event processor.
-
-### 4. Gate Check-in (`/api/v1/checkin`)
-- `POST /checkin/verify-qr` (Role: `VOLUNTEER_CHECKIN`, `ORGANIZER`, `SUPER_ADMIN`) — Cryptographically verifies HMAC QR and enforces zero duplicate check-ins.
-- `POST /checkin/manual-lookup` (Role: `VOLUNTEER_CHECKIN`, `ORGANIZER`, `SUPER_ADMIN`) — Search attendee by name/email/passId.
-- `GET  /checkin/stats` (Role: `VOLUNTEER_CHECKIN`, `ORGANIZER`, `SUPER_ADMIN`) — Live gate scan statistics.
-
-### 5. Teams & Jury Scoring (`/api/v1/teams`)
-- `POST /teams/create` (Bearer) — Creates Hackathon or Pitch team with join code (`HACK-XXXX`).
-- `POST /teams/join` (Bearer) — Joins team via code.
-- `GET  /teams/my-teams` (Bearer) — User's active teams and submissions.
-- `GET  /teams/:teamId` (Bearer) — Team details.
-- `POST /teams/:teamId/submit` (Bearer) — Submits repo URL, demo URL, and pitch deck.
-- `POST /teams/:teamId/score` (Role: `INVESTOR`, `ORGANIZER`, `SUPER_ADMIN`) — Jury rubric scoring (1-10 on Innovation, Execution, Market, Presentation).
-- `GET  /teams/leaderboard/:type` (Public) — Live competition leaderboard.
-
-### 6. CMS & Festival Content (`/api/v1/...`)
-- `GET /events` (Public) — Schedule events (filter by `day=1|2`, `track`, `type`).
-- `POST /events`, `PUT /events/:id`, `DELETE /events/:id` (Role: `ORGANIZER`, `SUPER_ADMIN`)
-- `GET /speakers` (Public) — 40+ speakers directory.
-- `POST /speakers`, `PUT /speakers/:id`, `DELETE /speakers/:id` (Role: `ORGANIZER`, `SUPER_ADMIN`)
-- `GET /sponsors` (Public) — Sponsor list by tier (title, gold, silver, media).
-- `POST /subscribers` (Public) — Newsletter signup.
-- `GET /subscribers` (Role: `ORGANIZER`, `SUPER_ADMIN`) — Subscribers list.
-
-### 7. AI Concierge (`/api/v1/concierge`)
-- `POST /concierge/chat` (Public) — RAG chat engine with festival context and UI action directives (`scrollToSection`, `highlightEvent`).
-
-### 8. Admin Analytics (`/api/v1/admin`)
-- `GET   /admin/analytics` (Role: `ORGANIZER`, `SUPER_ADMIN`) — Executive overview, revenue, check-in totals, college breakdown.
-- `GET   /admin/delegates` (Role: `ORGANIZER`, `SUPER_ADMIN`) — Paginated datatable with search and filters.
-- `GET   /admin/ca-leaderboard` (Role: `ORGANIZER`, `SUPER_ADMIN`) — Campus Ambassador referral rankings.
-- `PATCH /admin/delegates/:id/override` (Role: `ORGANIZER`, `SUPER_ADMIN`) — Manual gate/VIP override.
+Production REST API, security pipeline, and data engine for **PEC E-Summit 2026** (E-Cell, Punjab Engineering College, Chandigarh). Powers the public experience portal (`frontend/`) and the operations command center (`admin/`).
 
 ---
 
-## Seed Accounts (from `prisma/seed.ts`)
+## Architectural Highlights
 
-All pre-seeded test accounts use password: `PecSummit@2026`
+- **Database**: MongoDB (via Prisma ORM 6 with Replica Set `rs0` for atomic transactions).
+- **Authentication**: Stateless Passport JWT with Argon2id password hashing and refresh token rotation.
+- **Ticketing Security**: Node.js Crypto HMAC-SHA256 digital signature minted for each `PEC-XXXXXX` pass with anti-replay state validation.
+- **Media Uploads**: S3-compatible cloud object storage (`@aws-sdk/client-s3`) and Cloudinary CDN for festival assets.
+- **Email Delivery**: Resend API integration for automated pass confirmation and ticket QR delivery.
+- **Rate Limiting**: NestJS Throttler with memory store and Redis support.
 
-| Persona | Email | Role |
-| :--- | :--- | :--- |
-| **Super Admin** | `admin@pecsummit.com` | `SUPER_ADMIN` |
-| **Organizer** | `organizer@pecsummit.com` | `ORGANIZER` |
-| **Volunteer (Gate Checkin)** | `volunteer@pecsummit.com` | `VOLUNTEER_CHECKIN` |
-| **Investor / Judge** | `investor@pecsummit.com` | `INVESTOR` |
-| **Campus Ambassador** | `ca@pecsummit.com` (Code: `CA-PEC-2026`) | `DELEGATE` |
-| **Delegate** | `delegate@pecsummit.com` (Pass: `PEC-894210`) | `DELEGATE` |
+---
+
+## Module Status & Feature Matrix
+
+| Module | Route Prefix | Primary Function | Auth / Access |
+| :--- | :--- | :--- | :--- |
+| **Auth** | `/api/v1/auth` | Registration, login, refresh rotation, profile (`/me`) | Public / Bearer JWT |
+| **Registrations** | `/api/v1/registrations` | Pass catalog, `PEC-XXXXXX` pass minting, digital tickets | Public / Bearer JWT |
+| **Payments** | `/api/v1/payments` | Razorpay order creation, signature verification, webhooks | Public / Razorpay Signature |
+| **Gate Check-In** | `/api/v1/checkin` | Cryptographic HMAC QR verification, manual search, stats | Volunteer, Organizer, Admin |
+| **Teams & Jury** | `/api/v1/teams` | Join codes (`HACK-XXXX`), submissions, 1-10 jury rubric | User, Investor, Admin |
+| **CMS** | `/api/v1/...` | Schedule, events, speakers, sponsors, and announcements | Public / Organizer, Admin |
+| **AI Concierge** | `/api/v1/concierge` | Grounded festival RAG engine with UI action directives | Public |
+| **Admin Analytics** | `/api/v1/admin` | Revenue velocity, attendance stats, audit log query | Organizer, Admin |
+
+---
+
+## Quick Start
+
+### 1. Prerequisites
+- **Node.js**: `v20.x` LTS recommended (v18.18+ supported)
+- **MongoDB**: `v6.0+` (local replica set or MongoDB Atlas cluster)
+
+### 2. Local Setup
+
+```bash
+# 1. Navigate to directory
+cd backend
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment
+cp .env.example .env
+
+# 4. Generate Prisma client & push schema to MongoDB
+npx prisma generate
+npx prisma db push
+
+# 5. Seed initial festival schedule, speakers, and accounts
+npm run db:seed
+
+# 6. Start development server in watch mode (Port 4000)
+npm run start:dev
+```
+
+*Verify backend health at `http://localhost:4000/api/v1/health`.*
+
+---
+
+## API Route Directory
+
+All routes are mounted under `/api/v1`.
+
+### 1. Authentication (`/api/v1/auth`)
+- `POST /auth/register` (Public) — User account creation.
+- `POST /auth/login` (Public) — Returns short-lived JWT and sets HTTP-only refresh cookie.
+- `POST /auth/refresh` (Public) — Rotates refresh token family and issues fresh JWT.
+- `POST /auth/logout` (Public) — Revokes refresh session and clears cookie.
+- `GET  /auth/me` (Bearer) — Returns active user profile.
+
+### 2. Registrations & Passes (`/api/v1/registrations`)
+- `GET  /registrations/types` (Public) — Pass catalog, pricing, and live availability.
+- `POST /registrations/create` (Public/Bearer) — Creates pass with unique `PEC-XXXXXX` ID and HMAC-SHA256 `qrToken`.
+- `GET  /registrations/my-passes` (Bearer) — Digital tickets and signed QR codes.
+- `GET  /registrations/:passId` (Public/Bearer) — Pass verification and metadata lookup.
+
+### 3. Payments (`/api/v1/payments`)
+- `POST /payments/create-order` (Public) — Initializes Razorpay payment order.
+- `POST /payments/verify` (Public) — Verifies Razorpay transaction signature.
+- `POST /payments/webhook` (Public) — Asynchronous Razorpay webhook processor.
+
+### 4. Gate Check-In (`/api/v1/checkin`)
+- `POST /checkin/verify-qr` (Role: `VOLUNTEER_CHECKIN`, `ORGANIZER`, `SUPER_ADMIN`) — Cryptographically verifies HMAC QR and guarantees zero duplicate check-ins.
+- `POST /checkin/manual-lookup` (Role: `VOLUNTEER_CHECKIN`, `ORGANIZER`, `SUPER_ADMIN`) — Search attendee by name, email, or pass ID.
+- `GET  /checkin/stats` (Role: `VOLUNTEER_CHECKIN`, `ORGANIZER`, `SUPER_ADMIN`) — Real-time gate telemetry.
+
+### 5. Teams & Jury Scoring (`/api/v1/teams`)
+- `POST /teams/create` (Bearer) — Creates Hackathon/Pitch team with join code (`HACK-XXXX`).
+- `POST /teams/join` (Bearer) — Joins team via code.
+- `GET  /teams/my-teams` (Bearer) — User active teams and project submissions.
+- `POST /teams/:teamId/submit` (Bearer) — Submits GitHub repo URL, demo URL, and pitch deck.
+- `POST /teams/:teamId/score` (Role: `INVESTOR`, `ORGANIZER`, `SUPER_ADMIN`) — 4-pillar jury scoring (1-10 on Innovation, Execution, Market, Presentation).
+- `GET  /teams/leaderboard/:type` (Public) — Live competition leaderboard.
+
+### 6. CMS & Festival Content
+- `GET /events` (Public) — Schedule items (filter by `day=1|2`, `track`, `type`).
+- `POST /events`, `PUT /events/:id`, `DELETE /events/:id` (Role: `ORGANIZER`, `SUPER_ADMIN`)
+- `GET /speakers` (Public) — Speaker directory with session bindings.
+- `POST /speakers`, `PUT /speakers/:id`, `DELETE /speakers/:id` (Role: `ORGANIZER`, `SUPER_ADMIN`)
+- `GET /sponsors` (Public) — Sponsor list classified by tier.
+- `POST /subscribers` (Public) — Newsletter subscription.
+
+### 7. AI Concierge (`/api/v1/concierge`)
+- `POST /concierge/chat` (Public) — RAG chat engine with grounded festival context and UI action directives (`scrollToSection`, `highlightEvent`).
+
+---
+
+## Testing & CI Verification
+
+Backend has automated standalone CI (`backend/.github/workflows/ci.yml`) and a comprehensive Jest test suite:
+
+```bash
+# Run all unit and integration test suites (61 tests)
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Generate code coverage
+npm run test:cov
+
+# Run ESLint validation
+npm run lint
+
+# Production compilation
+npm run build
+```
+
+**Key Test Coverage**:
+- `src/auth/auth.service.spec.ts` (Password hashing, JWT rotation)
+- `src/checkin/checkin.service.spec.ts` (HMAC QR ticket checks & anti-replay)
+- `src/common/utils/qr.util.spec.ts` (HMAC-SHA256 signature tampering detection)
+- `src/admin/admin.service.spec.ts` (Analytics aggregation & CA tracking)
+- `src/teams/teams.service.spec.ts` (Jury scoring & leaderboard algorithms)
+- `src/cms/cms.service.spec.ts` (Festival events, speakers, and sponsors)
+- `src/health/health.controller.spec.ts` (Service & database health probe)
