@@ -1,18 +1,18 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { PaymentStatus } from '@prisma/client';
-import * as crypto from 'crypto';
-import { PaymentsService } from './payments.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { EmailService } from '../email/email.service';
+import { Test, TestingModule } from '@nestjs/testing'
+import { ConfigService } from '@nestjs/config'
+import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { PaymentStatus } from '@prisma/client'
+import * as crypto from 'crypto'
+import { PaymentsService } from './payments.service'
+import { PrismaService } from '../prisma/prisma.service'
+import { EmailService } from '../email/email.service'
 
 describe('PaymentsService', () => {
-  let service: PaymentsService;
+  let service: PaymentsService
 
   const mockEmailService = {
     sendPassConfirmationEmail: jest.fn().mockResolvedValue(true),
-  };
+  }
 
   const mockPrismaService: any = {
     registration: {
@@ -27,22 +27,22 @@ describe('PaymentsService', () => {
       updateMany: jest.fn(),
     },
     $transaction: jest.fn(async (cb: any) => cb(mockPrismaService)),
-  };
+  }
 
-  const keySecret = 'test-razorpay-key-secret-123456';
-  const webhookSecret = 'test-webhook-secret-987654';
+  const keySecret = 'test-razorpay-key-secret-123456'
+  const webhookSecret = 'test-webhook-secret-987654'
 
   const mockConfigService = {
     get: jest.fn((key: string) => {
-      if (key === 'RAZORPAY_KEY_ID') return 'rzp_test_pec_2026';
-      if (key === 'RAZORPAY_KEY_SECRET') return keySecret;
-      if (key === 'RAZORPAY_WEBHOOK_SECRET') return webhookSecret;
-      return undefined;
+      if (key === 'RAZORPAY_KEY_ID') return 'rzp_test_pec_2026'
+      if (key === 'RAZORPAY_KEY_SECRET') return keySecret
+      if (key === 'RAZORPAY_WEBHOOK_SECRET') return webhookSecret
+      return undefined
     }),
-  };
+  }
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    jest.clearAllMocks()
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,14 +51,14 @@ describe('PaymentsService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: EmailService, useValue: mockEmailService },
       ],
-    }).compile();
+    }).compile()
 
-    service = module.get<PaymentsService>(PaymentsService);
-  });
+    service = module.get<PaymentsService>(PaymentsService)
+  })
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+    expect(service).toBeDefined()
+  })
 
   describe('createOrder', () => {
     it('should create order checkout configuration for pending registration', async () => {
@@ -77,24 +77,22 @@ describe('PaymentsService', () => {
           currency: 'INR',
           status: PaymentStatus.PENDING,
         },
-      });
+      })
 
-      const res = await service.createOrder({ passId: 'PEC-894210' });
+      const res = await service.createOrder({ passId: 'PEC-894210' })
 
-      expect(res).toBeDefined();
-      expect(res.orderId).toBe('order_PEC_894210_123');
-      expect(res.amount).toBe(499);
-      expect(res.amountInPaisa).toBe(49900);
-      expect(res.razorpayKeyId).toBe('rzp_test_pec_2026');
-    });
+      expect(res).toBeDefined()
+      expect(res.orderId).toBe('order_PEC_894210_123')
+      expect(res.amount).toBe(499)
+      expect(res.amountInPaisa).toBe(49900)
+      expect(res.razorpayKeyId).toBe('rzp_test_pec_2026')
+    })
 
     it('should throw NotFoundException if pass does not exist', async () => {
-      mockPrismaService.registration.findUnique.mockResolvedValue(null);
+      mockPrismaService.registration.findUnique.mockResolvedValue(null)
 
-      await expect(service.createOrder({ passId: 'PEC-000000' })).rejects.toThrow(
-        NotFoundException,
-      );
-    });
+      await expect(service.createOrder({ passId: 'PEC-000000' })).rejects.toThrow(NotFoundException)
+    })
 
     it('should throw BadRequestException if pass is free and requires no payment', async () => {
       mockPrismaService.registration.findUnique.mockResolvedValue({
@@ -102,12 +100,12 @@ describe('PaymentsService', () => {
         passId: 'PEC-111111',
         user: { name: 'Free User', email: 'free@pec.com' },
         payment: null,
-      });
+      })
 
       await expect(service.createOrder({ passId: 'PEC-111111' })).rejects.toThrow(
-        BadRequestException,
-      );
-    });
+        BadRequestException
+      )
+    })
 
     it('should throw BadRequestException if payment is already completed', async () => {
       mockPrismaService.registration.findUnique.mockResolvedValue({
@@ -117,23 +115,23 @@ describe('PaymentsService', () => {
         payment: {
           status: PaymentStatus.SUCCESS,
         },
-      });
+      })
 
       await expect(service.createOrder({ passId: 'PEC-222222' })).rejects.toThrow(
-        BadRequestException,
-      );
-    });
-  });
+        BadRequestException
+      )
+    })
+  })
 
   describe('verifyPayment', () => {
-    const orderId = 'order_PEC_894210_123';
-    const transactionId = 'pay_test_transaction_999';
+    const orderId = 'order_PEC_894210_123'
+    const transactionId = 'pay_test_transaction_999'
 
     it('should verify payment with valid HMAC signature and transition status to SUCCESS', async () => {
       const validSignature = crypto
         .createHmac('sha256', keySecret)
         .update(`${orderId}|${transactionId}`)
-        .digest('hex');
+        .digest('hex')
 
       mockPrismaService.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
@@ -141,7 +139,7 @@ describe('PaymentsService', () => {
         amount: 499,
         status: PaymentStatus.PENDING,
         registration: { id: 'reg-1' },
-      });
+      })
 
       mockPrismaService.payment.update.mockResolvedValue({
         id: 'pay-1',
@@ -149,23 +147,23 @@ describe('PaymentsService', () => {
         transactionId,
         status: PaymentStatus.SUCCESS,
         amount: 499,
-      });
+      })
 
       const res = await service.verifyPayment({
         orderId,
         transactionId,
         signature: validSignature,
-      });
+      })
 
-      expect(res.success).toBe(true);
-      expect(res.payment.status).toBe(PaymentStatus.SUCCESS);
+      expect(res.success).toBe(true)
+      expect(res.payment.status).toBe(PaymentStatus.SUCCESS)
       expect(mockPrismaService.payment.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'pay-1' },
           data: expect.objectContaining({ status: PaymentStatus.SUCCESS }),
-        }),
-      );
-    });
+        })
+      )
+    })
 
     it('should throw BadRequestException on invalid signature', async () => {
       mockPrismaService.payment.findUnique.mockResolvedValue({
@@ -174,17 +172,17 @@ describe('PaymentsService', () => {
         amount: 499,
         status: PaymentStatus.PENDING,
         registration: { id: 'reg-1' },
-      });
+      })
 
       await expect(
         service.verifyPayment({
           orderId,
           transactionId,
           signature: 'invalid-tampered-signature-12345',
-        }),
-      ).rejects.toThrow(BadRequestException);
-    });
-  });
+        })
+      ).rejects.toThrow(BadRequestException)
+    })
+  })
 
   describe('handleWebhook', () => {
     it('should handle order.paid webhook and mark payment SUCCESS', async () => {
@@ -198,29 +196,26 @@ describe('PaymentsService', () => {
             },
           },
         },
-      };
+      }
 
-      const rawBody = JSON.stringify(payload);
-      const signature = crypto
-        .createHmac('sha256', webhookSecret)
-        .update(rawBody)
-        .digest('hex');
+      const rawBody = JSON.stringify(payload)
+      const signature = crypto.createHmac('sha256', webhookSecret).update(rawBody).digest('hex')
 
       mockPrismaService.payment.findUnique.mockResolvedValue({
         id: 'pay-1',
         orderId: 'order_test_123',
         status: PaymentStatus.PENDING,
-      });
+      })
 
-      const res = await service.handleWebhook(rawBody, signature, payload);
+      const res = await service.handleWebhook(rawBody, signature, payload)
 
-      expect(res.status).toBe('ok');
+      expect(res.status).toBe('ok')
       expect(mockPrismaService.payment.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'pay-1' },
           data: expect.objectContaining({ status: PaymentStatus.SUCCESS }),
-        }),
-      );
-    });
-  });
-});
+        })
+      )
+    })
+  })
+})

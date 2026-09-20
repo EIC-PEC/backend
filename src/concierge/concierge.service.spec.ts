@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { ConciergeService } from './concierge.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { Test, TestingModule } from '@nestjs/testing'
+import { ConfigService } from '@nestjs/config'
+import { ConciergeService } from './concierge.service'
+import { PrismaService } from '../prisma/prisma.service'
 
 describe('ConciergeService', () => {
-  let service: ConciergeService;
+  let service: ConciergeService
 
   const mockPrismaService: any = {
     event: {
@@ -16,17 +16,17 @@ describe('ConciergeService', () => {
     sponsor: {
       findMany: jest.fn(),
     },
-  };
+  }
 
   const mockConfigService = {
     get: jest.fn((key: string) => {
-      if (key === 'GEMINI_API_KEY') return undefined; // test local semantic engine
-      return undefined;
+      if (key === 'GEMINI_API_KEY') return undefined // test local semantic engine
+      return undefined
     }),
-  };
+  }
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    jest.clearAllMocks()
 
     mockPrismaService.event.findMany.mockResolvedValue([
       {
@@ -37,7 +37,7 @@ describe('ConciergeService', () => {
         venue: 'Main Auditorium',
         day: 1,
       },
-    ]);
+    ])
     mockPrismaService.speaker.findMany.mockResolvedValue([
       {
         id: 'spk-1',
@@ -45,8 +45,8 @@ describe('ConciergeService', () => {
         title: 'Managing Director, Surge Ventures',
         bio: 'Investor in 40+ AI startups.',
       },
-    ]);
-    mockPrismaService.sponsor.findMany.mockResolvedValue([]);
+    ])
+    mockPrismaService.sponsor.findMany.mockResolvedValue([])
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -54,71 +54,71 @@ describe('ConciergeService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
-    }).compile();
+    }).compile()
 
-    service = module.get<ConciergeService>(ConciergeService);
-  });
+    service = module.get<ConciergeService>(ConciergeService)
+  })
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+    expect(service).toBeDefined()
+  })
 
   describe('processChat', () => {
     it('should recommend passes and emit navigate action for ticket/pass queries', async () => {
       const res = await service.processChat({
         message: 'How much are the passes and tickets for students?',
-      });
+      })
 
-      expect(res).toBeDefined();
-      expect(res.reply).toContain('PEC Summit 2026');
+      expect(res).toBeDefined()
+      expect(res.reply).toContain('PEC Summit 2026')
       expect(res.action).toEqual({
         type: 'navigate',
         target: '/register',
         payload: { section: 'register' },
-      });
-      expect(res.source).toBe('festival_rag');
-    });
+      })
+      expect(res.source).toBe('festival_rag')
+    })
 
     it('should provide schedule information and emit navigate action for timing/agenda queries', async () => {
       const res = await service.processChat({
         message: 'What is the schedule for Day 1?',
-      });
+      })
 
-      expect(res).toBeDefined();
-      expect(res.reply).toContain('Schedule Highlights');
+      expect(res).toBeDefined()
+      expect(res.reply).toContain('Schedule Highlights')
       expect(res.action).toEqual({
         type: 'navigate',
         target: '/#timeline',
         payload: { section: 'timeline' },
-      });
-    });
+      })
+    })
 
     it('should provide hackathon track details for hacker queries', async () => {
       const res = await service.processChat({
         message: 'Tell me about the hackathon tracks and prizes',
-      });
+      })
 
-      expect(res).toBeDefined();
-      expect(res.reply).toContain('24-Hour Hackathon');
+      expect(res).toBeDefined()
+      expect(res.reply).toContain('24-Hour Hackathon')
       expect(res.action).toEqual({
         type: 'navigate',
         target: '/#competitions',
         payload: { section: 'competitions' },
-      });
-    });
+      })
+    })
 
     it('should provide speaker directory info for guest inquiries', async () => {
       const res = await service.processChat({
         message: 'Who is speaking at the summit?',
-      });
+      })
 
-      expect(res).toBeDefined();
-      expect(res.reply).toContain('Dr. Sameer Roy');
+      expect(res).toBeDefined()
+      expect(res.reply).toContain('Dr. Sameer Roy')
       expect(res.action).toEqual({
         type: 'navigate',
         target: '/#speakers',
         payload: { section: 'speakers' },
-      });
-    });
-  });
-});
+      })
+    })
+  })
+})

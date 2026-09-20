@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from 'zod'
 
 /**
  * Fail-fast environment contract. The app refuses to boot if a required
@@ -19,7 +19,7 @@ export const envSchema = z.object({
       value
         .split(',')
         .map((origin) => origin.trim())
-        .filter(Boolean),
+        .filter(Boolean)
     ),
 
   // ── Data stores ──
@@ -28,10 +28,9 @@ export const envSchema = z.object({
     .min(1, 'DATABASE_URL is required')
     .refine(
       (url) => /^mongodb(\+srv)?:\/\//.test(url) || /^postgres(ql)?:\/\//.test(url),
-      'DATABASE_URL must be a valid MongoDB connection string (mongodb:// or mongodb+srv://)',
+      'DATABASE_URL must be a valid MongoDB connection string (mongodb:// or mongodb+srv://)'
     ),
   REDIS_URL: z.string().url().optional(),
-
 
   // ── Auth (§4.1) ──
   JWT_ACCESS_SECRET: z.string().min(32, 'JWT_ACCESS_SECRET must be at least 32 characters'),
@@ -68,22 +67,21 @@ export const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   CLOUDINARY_URL: z.string().optional(),
-});
+})
 
-
-export type Env = z.infer<typeof envSchema>;
+export type Env = z.infer<typeof envSchema>
 
 export function validateEnv(raw: Record<string, unknown>): Env {
-  const parsed = envSchema.safeParse(raw);
+  const parsed = envSchema.safeParse(raw)
 
   if (!parsed.success) {
     const details = parsed.error.issues
       .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
-      .join('\n');
+      .join('\n')
     throw new Error(
-      `Invalid environment configuration:\n${details}\n\nCopy .env.example to .env and fill in the required values.`,
-    );
+      `Invalid environment configuration:\n${details}\n\nCopy .env.example to .env and fill in the required values.`
+    )
   }
 
-  return parsed.data;
+  return parsed.data
 }

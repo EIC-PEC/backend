@@ -1,16 +1,16 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { PassType, PaymentStatus, Role } from '@prisma/client';
-import { NotFoundException } from '@nestjs/common';
-import { AdminService } from './admin.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { EmailService } from '../email/email.service';
+import { Test, TestingModule } from '@nestjs/testing'
+import { PassType, PaymentStatus, Role } from '@prisma/client'
+import { NotFoundException } from '@nestjs/common'
+import { AdminService } from './admin.service'
+import { PrismaService } from '../prisma/prisma.service'
+import { EmailService } from '../email/email.service'
 
 describe('AdminService', () => {
-  let service: AdminService;
+  let service: AdminService
 
   const mockEmailService = {
     sendPassConfirmationEmail: jest.fn().mockResolvedValue(true),
-  };
+  }
 
   const mockPrismaService: any = {
     registration: {
@@ -39,10 +39,10 @@ describe('AdminService', () => {
     siteConfig: {
       findFirst: jest.fn().mockResolvedValue({ stats: { attendees: '3000+' } }),
     },
-  };
+  }
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    jest.clearAllMocks()
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -50,46 +50,46 @@ describe('AdminService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: EmailService, useValue: mockEmailService },
       ],
-    }).compile();
+    }).compile()
 
-    service = module.get<AdminService>(AdminService);
-  });
+    service = module.get<AdminService>(AdminService)
+  })
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+    expect(service).toBeDefined()
+  })
 
   describe('getAnalytics', () => {
     it('should return aggregated platform metrics', async () => {
-      mockPrismaService.registration.count.mockResolvedValue(250);
-      mockPrismaService.checkIn.count.mockResolvedValue(120);
-      mockPrismaService.team.count.mockResolvedValue(45);
+      mockPrismaService.registration.count.mockResolvedValue(250)
+      mockPrismaService.checkIn.count.mockResolvedValue(120)
+      mockPrismaService.team.count.mockResolvedValue(45)
       mockPrismaService.payment.aggregate.mockResolvedValue({
         _sum: { amount: 150000 },
         _count: { id: 200 },
-      });
+      })
       mockPrismaService.registration.groupBy.mockResolvedValue([
         { passType: PassType.STUDENT_GENERAL, _count: { id: 180 } },
-      ]);
+      ])
       mockPrismaService.user.groupBy.mockResolvedValue([
         { college: 'Punjab Engineering College', _count: { id: 95 } },
-      ]);
-      mockPrismaService.registration.findMany.mockResolvedValue([]);
+      ])
+      mockPrismaService.registration.findMany.mockResolvedValue([])
 
-      const result = await service.getAnalytics();
+      const result = await service.getAnalytics()
 
-      expect(result).toBeDefined();
-      expect(result.overview.totalDelegates).toBe(250);
-      expect(result.overview.totalCheckIns).toBe(120);
-      expect(result.overview.totalRevenue).toBe(150000);
-      expect(result.passTypeDistribution[0].passType).toBe(PassType.STUDENT_GENERAL);
-      expect(result.collegeBreakdown[0].college).toBe('Punjab Engineering College');
-    });
-  });
+      expect(result).toBeDefined()
+      expect(result.overview.totalDelegates).toBe(250)
+      expect(result.overview.totalCheckIns).toBe(120)
+      expect(result.overview.totalRevenue).toBe(150000)
+      expect(result.passTypeDistribution[0].passType).toBe(PassType.STUDENT_GENERAL)
+      expect(result.collegeBreakdown[0].college).toBe('Punjab Engineering College')
+    })
+  })
 
   describe('getDelegates', () => {
     it('should paginate and return delegates', async () => {
-      mockPrismaService.registration.count.mockResolvedValue(1);
+      mockPrismaService.registration.count.mockResolvedValue(1)
       mockPrismaService.registration.findMany.mockResolvedValue([
         {
           id: 'reg-1',
@@ -113,16 +113,16 @@ describe('AdminService', () => {
             status: PaymentStatus.SUCCESS,
           },
         },
-      ]);
+      ])
 
-      const result = await service.getDelegates(1, 10, 'Rohan');
+      const result = await service.getDelegates(1, 10, 'Rohan')
 
-      expect(result.page).toBe(1);
-      expect(result.total).toBe(1);
-      expect(result.items).toHaveLength(1);
-      expect(result.items[0].user.name).toBe('Rohan Sharma');
-    });
-  });
+      expect(result.page).toBe(1)
+      expect(result.total).toBe(1)
+      expect(result.items).toHaveLength(1)
+      expect(result.items[0].user.name).toBe('Rohan Sharma')
+    })
+  })
 
   describe('getCaLeaderboard', () => {
     it('should calculate referral counts and assign ambassador tiers', async () => {
@@ -138,43 +138,41 @@ describe('AdminService', () => {
             { id: 'u-11', registrations: [{ id: 'r-2' }] },
           ],
         },
-      ]);
+      ])
 
-      const leaderboard = await service.getCaLeaderboard();
+      const leaderboard = await service.getCaLeaderboard()
 
-      expect(leaderboard).toHaveLength(1);
-      expect(leaderboard[0].totalReferrals).toBe(2);
-      expect(leaderboard[0].confirmedSignups).toBe(2);
-      expect(leaderboard[0].tier).toBe('BRONZE_AMBASSADOR');
-    });
-  });
+      expect(leaderboard).toHaveLength(1)
+      expect(leaderboard[0].totalReferrals).toBe(2)
+      expect(leaderboard[0].confirmedSignups).toBe(2)
+      expect(leaderboard[0].tier).toBe('BRONZE_AMBASSADOR')
+    })
+  })
 
   describe('toggleCheckInOverride', () => {
     it('should invert the isCheckedIn boolean', async () => {
       mockPrismaService.registration.findUnique.mockResolvedValue({
         id: 'reg-1',
         isCheckedIn: false,
-      });
+      })
       mockPrismaService.registration.update.mockResolvedValue({
         id: 'reg-1',
         isCheckedIn: true,
-      });
+      })
 
-      const updated = await service.toggleCheckInOverride('reg-1');
+      const updated = await service.toggleCheckInOverride('reg-1')
 
-      expect(updated.isCheckedIn).toBe(true);
+      expect(updated.isCheckedIn).toBe(true)
       expect(mockPrismaService.registration.update).toHaveBeenCalledWith({
         where: { id: 'reg-1' },
         data: { isCheckedIn: true },
-      });
-    });
+      })
+    })
 
     it('should throw NotFoundException on non-existent registration ID', async () => {
-      mockPrismaService.registration.findUnique.mockResolvedValue(null);
+      mockPrismaService.registration.findUnique.mockResolvedValue(null)
 
-      await expect(
-        service.toggleCheckInOverride('invalid-id'),
-      ).rejects.toThrow(NotFoundException);
-    });
-  });
-});
+      await expect(service.toggleCheckInOverride('invalid-id')).rejects.toThrow(NotFoundException)
+    })
+  })
+})

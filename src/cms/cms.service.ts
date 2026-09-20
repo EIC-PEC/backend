@@ -1,32 +1,32 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { CacheService } from '../common/cache/cache.service';
-import { CreateEventDto } from './dto/create-event.dto';
-import { CreateSpeakerDto } from './dto/create-speaker.dto';
-import { CreateSponsorDto } from './dto/create-sponsor.dto';
-import { CreateAlumniDto } from './dto/create-alumni.dto';
-import { CreateGalleryDto } from './dto/create-gallery.dto';
-import { CreateScheduleItemDto } from './dto/create-schedule-item.dto';
-import { CreateFaqDto } from './dto/create-faq.dto';
-import { UpdateSiteConfigDto } from './dto/update-site-config.dto';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common'
+import { Prisma } from '@prisma/client'
+import { PrismaService } from '../prisma/prisma.service'
+import { CacheService } from '../common/cache/cache.service'
+import { CreateEventDto } from './dto/create-event.dto'
+import { CreateSpeakerDto } from './dto/create-speaker.dto'
+import { CreateSponsorDto } from './dto/create-sponsor.dto'
+import { CreateAlumniDto } from './dto/create-alumni.dto'
+import { CreateGalleryDto } from './dto/create-gallery.dto'
+import { CreateScheduleItemDto } from './dto/create-schedule-item.dto'
+import { CreateFaqDto } from './dto/create-faq.dto'
+import { UpdateSiteConfigDto } from './dto/update-site-config.dto'
 
-const CMS_CACHE_TTL_SECONDS = 300; // 5 minutes
+const CMS_CACHE_TTL_SECONDS = 300 // 5 minutes
 
 @Injectable()
 export class CmsService {
-  private readonly logger = new Logger(CmsService.name);
+  private readonly logger = new Logger(CmsService.name)
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly cacheService: CacheService,
+    private readonly cacheService: CacheService
   ) {}
 
   private invalidateCmsCache(entity?: string) {
     if (entity) {
-      this.cacheService.invalidatePrefix(`cms:${entity}`);
+      this.cacheService.invalidatePrefix(`cms:${entity}`)
     } else {
-      this.cacheService.invalidatePrefix('cms:');
+      this.cacheService.invalidatePrefix('cms:')
     }
   }
 
@@ -38,8 +38,8 @@ export class CmsService {
         where: { id: 'global' },
         create: { id: 'global' },
         update: {},
-      });
-    });
+      })
+    })
   }
 
   async updateSiteConfig(dto: UpdateSiteConfigDto) {
@@ -47,37 +47,37 @@ export class CmsService {
       ...dto,
       stats: dto.stats as Prisma.InputJsonValue,
       contacts: dto.contacts as Prisma.InputJsonValue,
-    };
+    }
     const res = await this.prisma.siteConfig.upsert({
       where: { id: 'global' },
       create: { id: 'global', ...(data as Prisma.SiteConfigCreateInput) },
       update: data,
-    });
-    this.invalidateCmsCache('config');
-    return res;
+    })
+    this.invalidateCmsCache('config')
+    return res
   }
 
   // ── Events ────────────────────────────────────────────────────────────────
 
   async getEvents(day?: number, track?: string, type?: string) {
-    const cacheKey = `cms:events:${day ?? 'all'}:${track ?? 'all'}:${type ?? 'all'}`;
+    const cacheKey = `cms:events:${day ?? 'all'}:${track ?? 'all'}:${type ?? 'all'}`
     return this.cacheService.getOrSet(cacheKey, CMS_CACHE_TTL_SECONDS, async () => {
-      const where: Record<string, unknown> = {};
-      if (day !== undefined) where.day = day;
-      if (track) where.track = track;
-      if (type) where.type = type;
+      const where: Record<string, unknown> = {}
+      if (day !== undefined) where.day = day
+      if (track) where.track = track
+      if (type) where.type = type
       return this.prisma.event.findMany({
         where,
         take: 1000,
         orderBy: [{ order: 'asc' }, { day: 'asc' }, { startTime: 'asc' }],
-      });
-    });
+      })
+    })
   }
 
   async getEventById(id: string) {
-    const event = await this.prisma.event.findUnique({ where: { id } });
-    if (!event) throw new NotFoundException(`Event ${id} not found.`);
-    return event;
+    const event = await this.prisma.event.findUnique({ where: { id } })
+    if (!event) throw new NotFoundException(`Event ${id} not found.`)
+    return event
   }
 
   async createEvent(dto: CreateEventDto) {
@@ -103,13 +103,13 @@ export class CmsService {
         speakerIds: dto.speakerIds ?? [],
         order: dto.order ?? 0,
       },
-    });
-    this.invalidateCmsCache('events');
-    return res;
+    })
+    this.invalidateCmsCache('events')
+    return res
   }
 
   async updateEvent(id: string, dto: Partial<CreateEventDto>) {
-    await this.getEventById(id);
+    await this.getEventById(id)
     const res = await this.prisma.event.update({
       where: { id },
       data: {
@@ -137,36 +137,36 @@ export class CmsService {
         ...(dto.speakerIds && { speakerIds: dto.speakerIds }),
         ...(dto.order !== undefined && { order: dto.order }),
       },
-    });
-    this.invalidateCmsCache('events');
-    return res;
+    })
+    this.invalidateCmsCache('events')
+    return res
   }
 
   async deleteEvent(id: string) {
-    await this.getEventById(id);
-    const res = await this.prisma.event.delete({ where: { id } });
-    this.invalidateCmsCache('events');
-    return res;
+    await this.getEventById(id)
+    const res = await this.prisma.event.delete({ where: { id } })
+    this.invalidateCmsCache('events')
+    return res
   }
 
   // ── Speakers ──────────────────────────────────────────────────────────────
 
   async getSpeakers(category?: string) {
-    const cacheKey = `cms:speakers:${category ?? 'all'}`;
+    const cacheKey = `cms:speakers:${category ?? 'all'}`
     return this.cacheService.getOrSet(cacheKey, CMS_CACHE_TTL_SECONDS, async () => {
-      const where = category ? { category } : {};
+      const where = category ? { category } : {}
       return this.prisma.speaker.findMany({
         where,
         take: 1000,
         orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
-      });
-    });
+      })
+    })
   }
 
   async getSpeakerById(id: string) {
-    const speaker = await this.prisma.speaker.findUnique({ where: { id } });
-    if (!speaker) throw new NotFoundException(`Speaker ${id} not found.`);
-    return speaker;
+    const speaker = await this.prisma.speaker.findUnique({ where: { id } })
+    if (!speaker) throw new NotFoundException(`Speaker ${id} not found.`)
+    return speaker
   }
 
   async createSpeaker(dto: CreateSpeakerDto) {
@@ -187,13 +187,13 @@ export class CmsService {
         twitter: dto.twitter?.trim() || null,
         order: dto.order ?? 0,
       },
-    });
-    this.invalidateCmsCache('speakers');
-    return res;
+    })
+    this.invalidateCmsCache('speakers')
+    return res
   }
 
   async updateSpeaker(id: string, dto: Partial<CreateSpeakerDto>) {
-    await this.getSpeakerById(id);
+    await this.getSpeakerById(id)
     const res = await this.prisma.speaker.update({
       where: { id },
       data: {
@@ -212,47 +212,47 @@ export class CmsService {
         ...(dto.twitter !== undefined && { twitter: dto.twitter?.trim() || null }),
         ...(dto.order !== undefined && { order: dto.order }),
       },
-    });
-    this.invalidateCmsCache('speakers');
-    return res;
+    })
+    this.invalidateCmsCache('speakers')
+    return res
   }
 
   async deleteSpeaker(id: string) {
-    await this.getSpeakerById(id);
+    await this.getSpeakerById(id)
 
     // Relational Scrubbing: Remove this speaker from any Event that references them
     const affectedEvents = await this.prisma.event.findMany({
-      where: { speakerIds: { has: id } }
-    });
+      where: { speakerIds: { has: id } },
+    })
 
-    const updatePromises = affectedEvents.map(event =>
+    const updatePromises = affectedEvents.map((event) =>
       this.prisma.event.update({
         where: { id: event.id },
-        data: { speakerIds: event.speakerIds.filter(sId => sId !== id) }
+        data: { speakerIds: event.speakerIds.filter((sId) => sId !== id) },
       })
-    );
+    )
 
     const [res] = await this.prisma.$transaction([
       this.prisma.speaker.delete({ where: { id } }),
-      ...updatePromises
-    ]);
+      ...updatePromises,
+    ])
 
-    this.invalidateCmsCache('speakers');
-    return res;
+    this.invalidateCmsCache('speakers')
+    return res
   }
 
   // ── Sponsors ──────────────────────────────────────────────────────────────
 
   async getSponsors(tier?: string) {
-    const cacheKey = `cms:sponsors:${tier ?? 'all'}`;
+    const cacheKey = `cms:sponsors:${tier ?? 'all'}`
     return this.cacheService.getOrSet(cacheKey, CMS_CACHE_TTL_SECONDS, async () => {
-      const where = tier ? { tier } : {};
+      const where = tier ? { tier } : {}
       return this.prisma.sponsor.findMany({
         where,
         take: 1000,
         orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
-      });
-    });
+      })
+    })
   }
 
   async createSponsor(dto: CreateSponsorDto) {
@@ -265,9 +265,9 @@ export class CmsService {
         category: dto.category?.trim() || '',
         order: dto.order ?? 0,
       },
-    });
-    this.invalidateCmsCache('sponsors');
-    return res;
+    })
+    this.invalidateCmsCache('sponsors')
+    return res
   }
 
   async updateSponsor(id: string, dto: Partial<CreateSponsorDto>) {
@@ -283,15 +283,15 @@ export class CmsService {
         ...(dto.category !== undefined && { category: dto.category?.trim() || '' }),
         ...(dto.order !== undefined && { order: dto.order }),
       },
-    });
-    this.invalidateCmsCache('sponsors');
-    return res;
+    })
+    this.invalidateCmsCache('sponsors')
+    return res
   }
 
   async deleteSponsor(id: string) {
-    const res = await this.prisma.sponsor.delete({ where: { id } });
-    this.invalidateCmsCache('sponsors');
-    return res;
+    const res = await this.prisma.sponsor.delete({ where: { id } })
+    this.invalidateCmsCache('sponsors')
+    return res
   }
 
   // ── Alumni ────────────────────────────────────────────────────────────────
@@ -301,14 +301,14 @@ export class CmsService {
       return this.prisma.alumni.findMany({
         take: 1000,
         orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
-      });
-    });
+      })
+    })
   }
 
   async getAlumniById(id: string) {
-    const item = await this.prisma.alumni.findUnique({ where: { id } });
-    if (!item) throw new NotFoundException(`Alumni ${id} not found.`);
-    return item;
+    const item = await this.prisma.alumni.findUnique({ where: { id } })
+    if (!item) throw new NotFoundException(`Alumni ${id} not found.`)
+    return item
   }
 
   async createAlumni(dto: CreateAlumniDto) {
@@ -325,13 +325,13 @@ export class CmsService {
         linkedin: dto.linkedin?.trim() || null,
         order: dto.order ?? 0,
       },
-    });
-    this.invalidateCmsCache('alumni');
-    return res;
+    })
+    this.invalidateCmsCache('alumni')
+    return res
   }
 
   async updateAlumni(id: string, dto: Partial<CreateAlumniDto>) {
-    await this.getAlumniById(id);
+    await this.getAlumniById(id)
     const res = await this.prisma.alumni.update({
       where: { id },
       data: {
@@ -346,30 +346,30 @@ export class CmsService {
         ...(dto.linkedin !== undefined && { linkedin: dto.linkedin?.trim() || null }),
         ...(dto.order !== undefined && { order: dto.order }),
       },
-    });
-    this.invalidateCmsCache('alumni');
-    return res;
+    })
+    this.invalidateCmsCache('alumni')
+    return res
   }
 
   async deleteAlumni(id: string) {
-    await this.getAlumniById(id);
-    const res = await this.prisma.alumni.delete({ where: { id } });
-    this.invalidateCmsCache('alumni');
-    return res;
+    await this.getAlumniById(id)
+    const res = await this.prisma.alumni.delete({ where: { id } })
+    this.invalidateCmsCache('alumni')
+    return res
   }
 
   // ── FAQs ──────────────────────────────────────────────────────────────────
 
   async getFaqs(category?: string) {
-    const cacheKey = `cms:faqs:${category ?? 'all'}`;
+    const cacheKey = `cms:faqs:${category ?? 'all'}`
     return this.cacheService.getOrSet(cacheKey, CMS_CACHE_TTL_SECONDS, async () => {
-      const where = category ? { category } : {};
+      const where = category ? { category } : {}
       return this.prisma.faq.findMany({
         where,
         take: 1000,
         orderBy: [{ order: 'asc' }, { createdAt: 'asc' }],
-      });
-    });
+      })
+    })
   }
 
   async createFaq(dto: CreateFaqDto) {
@@ -380,9 +380,9 @@ export class CmsService {
         category: dto.category ?? 'General',
         order: dto.order ?? 0,
       },
-    });
-    this.invalidateCmsCache('faqs');
-    return res;
+    })
+    this.invalidateCmsCache('faqs')
+    return res
   }
 
   async updateFaq(id: string, dto: Partial<CreateFaqDto>) {
@@ -394,29 +394,29 @@ export class CmsService {
         ...(dto.category && { category: dto.category }),
         ...(dto.order !== undefined && { order: dto.order }),
       },
-    });
-    this.invalidateCmsCache('faqs');
-    return res;
+    })
+    this.invalidateCmsCache('faqs')
+    return res
   }
 
   async deleteFaq(id: string) {
-    const res = await this.prisma.faq.delete({ where: { id } });
-    this.invalidateCmsCache('faqs');
-    return res;
+    const res = await this.prisma.faq.delete({ where: { id } })
+    this.invalidateCmsCache('faqs')
+    return res
   }
 
   // ── Schedule Items ────────────────────────────────────────────────────────
 
   async getScheduleItems(day?: number) {
-    const cacheKey = `cms:schedule:${day ?? 'all'}`;
+    const cacheKey = `cms:schedule:${day ?? 'all'}`
     return this.cacheService.getOrSet(cacheKey, CMS_CACHE_TTL_SECONDS, async () => {
-      const where = day !== undefined ? { day } : {};
+      const where = day !== undefined ? { day } : {}
       return this.prisma.scheduleItem.findMany({
         where,
         take: 1000,
         orderBy: [{ day: 'asc' }, { order: 'asc' }, { time: 'asc' }],
-      });
-    });
+      })
+    })
   }
 
   async createScheduleItem(dto: CreateScheduleItemDto) {
@@ -434,9 +434,9 @@ export class CmsService {
         lng: dto.lng ?? 76.7874,
         order: dto.order ?? 0,
       },
-    });
-    this.invalidateCmsCache('schedule');
-    return res;
+    })
+    this.invalidateCmsCache('schedule')
+    return res
   }
 
   async updateScheduleItem(id: string, dto: Partial<CreateScheduleItemDto>) {
@@ -455,15 +455,15 @@ export class CmsService {
         ...(dto.lng !== undefined && { lng: dto.lng }),
         ...(dto.order !== undefined && { order: dto.order }),
       },
-    });
-    this.invalidateCmsCache('schedule');
-    return res;
+    })
+    this.invalidateCmsCache('schedule')
+    return res
   }
 
   async deleteScheduleItem(id: string) {
-    const res = await this.prisma.scheduleItem.delete({ where: { id } });
-    this.invalidateCmsCache('schedule');
-    return res;
+    const res = await this.prisma.scheduleItem.delete({ where: { id } })
+    this.invalidateCmsCache('schedule')
+    return res
   }
 
   // ── Gallery Items ─────────────────────────────────────────────────────────
@@ -472,8 +472,8 @@ export class CmsService {
     return this.cacheService.getOrSet('cms:gallery', CMS_CACHE_TTL_SECONDS, async () => {
       return this.prisma.galleryItem.findMany({
         orderBy: [{ slot: 'asc' }, { createdAt: 'desc' }],
-      });
-    });
+      })
+    })
   }
 
   async createGalleryItem(dto: CreateGalleryDto) {
@@ -484,9 +484,9 @@ export class CmsService {
         mediaType: dto.mediaType || 'IMAGE',
         slot: dto.slot ?? 0,
       },
-    });
-    this.invalidateCmsCache('gallery');
-    return res;
+    })
+    this.invalidateCmsCache('gallery')
+    return res
   }
 
   async updateGalleryItem(id: string, dto: Partial<CreateGalleryDto>) {
@@ -498,23 +498,23 @@ export class CmsService {
         ...(dto.mediaType && { mediaType: dto.mediaType }),
         ...(dto.slot !== undefined && { slot: dto.slot }),
       },
-    });
-    this.invalidateCmsCache('gallery');
-    return res;
+    })
+    this.invalidateCmsCache('gallery')
+    return res
   }
 
   async deleteGalleryItem(id: string) {
-    const res = await this.prisma.galleryItem.delete({ where: { id } });
-    this.invalidateCmsCache('gallery');
-    return res;
+    const res = await this.prisma.galleryItem.delete({ where: { id } })
+    this.invalidateCmsCache('gallery')
+    return res
   }
 
   // ── Portfolio Event Media ─────────────────────────────────────────────────
 
   async getPortfolioEventMedia() {
     return this.cacheService.getOrSet('cms:portfolio_media', CMS_CACHE_TTL_SECONDS, async () => {
-      return this.prisma.portfolioEventItem.findMany();
-    });
+      return this.prisma.portfolioEventItem.findMany()
+    })
   }
 
   async setPortfolioEventImage(eventId: string, imageUrl: string) {
@@ -522,58 +522,86 @@ export class CmsService {
       where: { eventId },
       update: { imageUrl: imageUrl.trim() },
       create: { eventId, imageUrl: imageUrl.trim() },
-    });
-    this.invalidateCmsCache('portfolio_media');
-    return res;
+    })
+    this.invalidateCmsCache('portfolio_media')
+    return res
   }
 
   async deletePortfolioEventImage(eventId: string) {
-    const res = await this.prisma.portfolioEventItem.deleteMany({ where: { eventId } });
-    this.invalidateCmsCache('portfolio_media');
-    return res;
+    const res = await this.prisma.portfolioEventItem.deleteMany({ where: { eventId } })
+    this.invalidateCmsCache('portfolio_media')
+    return res
   }
 
   // ── Bundle: single-payload for fast frontend bootstrap ────────────────────
 
   async getBundle() {
     return this.cacheService.getOrSet('cms:bundle', CMS_CACHE_TTL_SECONDS, async () => {
-      const [siteConfig, rawEvents, speakers, scheduleItems, sponsors, alumni, faqs, gallery, portfolioMedia] =
-        await Promise.all([
-          this.getSiteConfig(),
-          this.getEvents(),
-          this.getSpeakers(),
-          this.getScheduleItems(),
-          this.getSponsors(),
-          this.getAlumni(),
-          this.getFaqs(),
-          this.getGallery(),
-          this.getPortfolioEventMedia(),
-        ]);
+      const [
+        siteConfig,
+        rawEvents,
+        speakers,
+        scheduleItems,
+        sponsors,
+        alumni,
+        faqs,
+        gallery,
+        portfolioMedia,
+      ] = await Promise.all([
+        this.getSiteConfig(),
+        this.getEvents(),
+        this.getSpeakers(),
+        this.getScheduleItems(),
+        this.getSponsors(),
+        this.getAlumni(),
+        this.getFaqs(),
+        this.getGallery(),
+        this.getPortfolioEventMedia(),
+      ])
 
       const events = rawEvents.map((evt: any, idx: number) => {
-        const numStr = evt.number || `0${idx + 1}`.slice(-2);
+        const numStr = evt.number || `0${idx + 1}`.slice(-2)
         const matched = portfolioMedia.find(
           (p: any) =>
             p.eventId === evt.id ||
             p.eventId === numStr ||
-            (p.eventId === 'corporate-workshops' && (numStr === '01' || evt.title.includes('Workshop'))) ||
-            (p.eventId === 'internship-job-fair' && (numStr === '02' || evt.title.includes('Internship') || evt.title.includes('Career'))) ||
+            (p.eventId === 'corporate-workshops' &&
+              (numStr === '01' || evt.title.includes('Workshop'))) ||
+            (p.eventId === 'internship-job-fair' &&
+              (numStr === '02' ||
+                evt.title.includes('Internship') ||
+                evt.title.includes('Career'))) ||
             (p.eventId === 'rd-conclave' && (numStr === '03' || evt.title.includes('R&D'))) ||
             (p.eventId === 'ipl-auction' && (numStr === '04' || evt.title.includes('IPL'))) ||
             (p.eventId === 'ignite' && (numStr === '05' || evt.title.includes('Ignite'))) ||
-            (p.eventId === 'treasure-hunt' && (numStr === '06' || evt.title.includes('Treasure'))) ||
+            (p.eventId === 'treasure-hunt' &&
+              (numStr === '06' || evt.title.includes('Treasure'))) ||
             (p.eventId === 'baazar' && (numStr === '07' || evt.title.includes('Baazar'))) ||
             (p.eventId === 'bizquiz-saasc' && (numStr === '08' || evt.title.includes('BizQuiz'))) ||
-            (p.eventId === 'additional-quiz-saasc' && (numStr === '09' || evt.title.includes('Knowledge Quiz'))) ||
-            (p.eventId === 'campus-ambassador' && (numStr === '10' || evt.title.includes('Ambassador'))) ||
-            (p.eventId === 'expert-speakers' && (numStr === '11' || evt.title.includes('Speaker'))) ||
-            (p.eventId === 'funding-conclave' && (numStr === '12' || evt.title.includes('Funding'))) ||
+            (p.eventId === 'additional-quiz-saasc' &&
+              (numStr === '09' || evt.title.includes('Knowledge Quiz'))) ||
+            (p.eventId === 'campus-ambassador' &&
+              (numStr === '10' || evt.title.includes('Ambassador'))) ||
+            (p.eventId === 'expert-speakers' &&
+              (numStr === '11' || evt.title.includes('Speaker'))) ||
+            (p.eventId === 'funding-conclave' &&
+              (numStr === '12' || evt.title.includes('Funding'))) ||
             (p.eventId === 'case-competition' && (numStr === '13' || evt.title.includes('Case')))
-        );
-        return matched?.imageUrl ? { ...evt, image: matched.imageUrl } : evt;
-      });
+        )
+        return matched?.imageUrl ? { ...evt, image: matched.imageUrl } : evt
+      })
 
-      return { siteConfig, events, speakers, scheduleItems, sponsors, alumni, faqs, gallery, portfolioMedia };
-    });
+      return {
+        siteConfig,
+        events,
+        speakers,
+        scheduleItems,
+        sponsors,
+        alumni,
+        faqs,
+        gallery,
+        portfolioMedia,
+      }
+    })
   }
 }

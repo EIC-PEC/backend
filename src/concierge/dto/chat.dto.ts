@@ -1,21 +1,21 @@
-import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class ChatMessageDto {
   @IsNotEmpty()
   @IsString()
-  role: 'user' | 'assistant' | 'system';
+  role: 'user' | 'assistant' | 'system'
 
   @IsNotEmpty()
   @IsString()
-  content: string;
+  content: string
 }
 
 export class ChatQueryDto {
   @IsNotEmpty()
   @IsString()
-  message: string;
+  message: string
 
   @IsOptional()
   @IsArray()
-  history?: ChatMessageDto[];
+  history?: ChatMessageDto[]
 }

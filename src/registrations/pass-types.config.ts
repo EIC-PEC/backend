@@ -1,16 +1,16 @@
-import { PassType } from '@prisma/client';
+import { PassType } from '@prisma/client'
 
 export interface PassTierMetadata {
-  id: string;
-  enumType: PassType;
-  title: string;
-  tagline: string;
-  feeAmount: number;
-  feeDisplay: string;
-  badgeTitle: string;
-  category: 'student' | 'founder' | 'group' | 'ambassador';
-  features: string[];
-  popular?: boolean;
+  id: string
+  enumType: PassType
+  title: string
+  tagline: string
+  feeAmount: number
+  feeDisplay: string
+  badgeTitle: string
+  category: 'student' | 'founder' | 'group' | 'ambassador'
+  features: string[]
+  popular?: boolean
 }
 
 export const PASS_TIERS_CATALOG: PassTierMetadata[] = [
@@ -79,4 +79,4 @@ export const PASS_TIERS_CATALOG: PassTierMetadata[] = [
       'Direct interaction with organizing committee',
     ],
   },
-];
+]

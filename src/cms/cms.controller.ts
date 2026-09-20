@@ -11,20 +11,20 @@ import {
   Post,
   Put,
   Query,
-} from '@nestjs/common';
-import { SkipThrottle } from '@nestjs/throttler';
-import { Public } from '../common/decorators/public.decorator';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '@prisma/client';
-import { CmsService } from './cms.service';
-import { CreateEventDto } from './dto/create-event.dto';
-import { CreateSpeakerDto } from './dto/create-speaker.dto';
-import { CreateSponsorDto } from './dto/create-sponsor.dto';
-import { CreateAlumniDto } from './dto/create-alumni.dto';
-import { CreateGalleryDto } from './dto/create-gallery.dto';
-import { CreateScheduleItemDto } from './dto/create-schedule-item.dto';
-import { CreateFaqDto } from './dto/create-faq.dto';
-import { UpdateSiteConfigDto } from './dto/update-site-config.dto';
+} from '@nestjs/common'
+import { SkipThrottle } from '@nestjs/throttler'
+import { Public } from '../common/decorators/public.decorator'
+import { Roles } from '../common/decorators/roles.decorator'
+import { Role } from '@prisma/client'
+import { CmsService } from './cms.service'
+import { CreateEventDto } from './dto/create-event.dto'
+import { CreateSpeakerDto } from './dto/create-speaker.dto'
+import { CreateSponsorDto } from './dto/create-sponsor.dto'
+import { CreateAlumniDto } from './dto/create-alumni.dto'
+import { CreateGalleryDto } from './dto/create-gallery.dto'
+import { CreateScheduleItemDto } from './dto/create-schedule-item.dto'
+import { CreateFaqDto } from './dto/create-faq.dto'
+import { UpdateSiteConfigDto } from './dto/update-site-config.dto'
 
 // ── Bundle: single-payload for frontend bootstrap ──────────────────────────
 
@@ -37,7 +37,7 @@ export class BundleController {
   @Header('Cache-Control', 'public, max-age=60, s-maxage=300, stale-while-revalidate=86400')
   @Get()
   async getBundle() {
-    return this.cms.getBundle();
+    return this.cms.getBundle()
   }
 }
 
@@ -51,13 +51,13 @@ export class SiteConfigController {
   @Public()
   @Get()
   async get() {
-    return this.cms.getSiteConfig();
+    return this.cms.getSiteConfig()
   }
 
   @Roles(Role.ADMIN)
   @Put()
   async update(@Body() dto: UpdateSiteConfigDto) {
-    return this.cms.updateSiteConfig(dto);
+    return this.cms.updateSiteConfig(dto)
   }
 }
 
@@ -70,40 +70,44 @@ export class EventsController {
 
   @Public()
   @Get()
-  async getAll(@Query('day') day?: string, @Query('track') track?: string, @Query('type') type?: string) {
-    return this.cms.getEvents(day ? parseInt(day, 10) : undefined, track, type);
+  async getAll(
+    @Query('day') day?: string,
+    @Query('track') track?: string,
+    @Query('type') type?: string
+  ) {
+    return this.cms.getEvents(day ? parseInt(day, 10) : undefined, track, type)
   }
 
   @Public()
   @Get(':id')
   async getOne(@Param('id') id: string) {
-    return this.cms.getEventById(id);
+    return this.cms.getEventById(id)
   }
 
   @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateEventDto) {
-    return this.cms.createEvent(dto);
+    return this.cms.createEvent(dto)
   }
 
   @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateEventDto>) {
-    return this.cms.updateEvent(id, dto);
+    return this.cms.updateEvent(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateEventDto>) {
-    return this.cms.updateEvent(id, dto);
+    return this.cms.updateEvent(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    return this.cms.deleteEvent(id);
+    return this.cms.deleteEvent(id)
   }
 }
 
@@ -117,39 +121,39 @@ export class SpeakersController {
   @Public()
   @Get()
   async getAll() {
-    return this.cms.getSpeakers();
+    return this.cms.getSpeakers()
   }
 
   @Public()
   @Get(':id')
   async getOne(@Param('id') id: string) {
-    return this.cms.getSpeakerById(id);
+    return this.cms.getSpeakerById(id)
   }
 
   @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateSpeakerDto) {
-    return this.cms.createSpeaker(dto);
+    return this.cms.createSpeaker(dto)
   }
 
   @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateSpeakerDto>) {
-    return this.cms.updateSpeaker(id, dto);
+    return this.cms.updateSpeaker(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateSpeakerDto>) {
-    return this.cms.updateSpeaker(id, dto);
+    return this.cms.updateSpeaker(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    return this.cms.deleteSpeaker(id);
+    return this.cms.deleteSpeaker(id)
   }
 }
 
@@ -163,33 +167,33 @@ export class ScheduleController {
   @Public()
   @Get()
   async getAll(@Query('day') day?: string) {
-    return this.cms.getScheduleItems(day ? parseInt(day, 10) : undefined);
+    return this.cms.getScheduleItems(day ? parseInt(day, 10) : undefined)
   }
 
   @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateScheduleItemDto) {
-    return this.cms.createScheduleItem(dto);
+    return this.cms.createScheduleItem(dto)
   }
 
   @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateScheduleItemDto>) {
-    return this.cms.updateScheduleItem(id, dto);
+    return this.cms.updateScheduleItem(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateScheduleItemDto>) {
-    return this.cms.updateScheduleItem(id, dto);
+    return this.cms.updateScheduleItem(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    return this.cms.deleteScheduleItem(id);
+    return this.cms.deleteScheduleItem(id)
   }
 }
 
@@ -203,33 +207,33 @@ export class SponsorsController {
   @Public()
   @Get()
   async getAll() {
-    return this.cms.getSponsors();
+    return this.cms.getSponsors()
   }
 
   @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateSponsorDto) {
-    return this.cms.createSponsor(dto);
+    return this.cms.createSponsor(dto)
   }
 
   @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateSponsorDto>) {
-    return this.cms.updateSponsor(id, dto);
+    return this.cms.updateSponsor(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateSponsorDto>) {
-    return this.cms.updateSponsor(id, dto);
+    return this.cms.updateSponsor(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    return this.cms.deleteSponsor(id);
+    return this.cms.deleteSponsor(id)
   }
 }
 
@@ -243,39 +247,39 @@ export class AlumniController {
   @Public()
   @Get()
   async getAll() {
-    return this.cms.getAlumni();
+    return this.cms.getAlumni()
   }
 
   @Public()
   @Get(':id')
   async getOne(@Param('id') id: string) {
-    return this.cms.getAlumniById(id);
+    return this.cms.getAlumniById(id)
   }
 
   @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateAlumniDto) {
-    return this.cms.createAlumni(dto);
+    return this.cms.createAlumni(dto)
   }
 
   @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateAlumniDto>) {
-    return this.cms.updateAlumni(id, dto);
+    return this.cms.updateAlumni(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateAlumniDto>) {
-    return this.cms.updateAlumni(id, dto);
+    return this.cms.updateAlumni(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    return this.cms.deleteAlumni(id);
+    return this.cms.deleteAlumni(id)
   }
 }
 
@@ -289,33 +293,33 @@ export class FaqsController {
   @Public()
   @Get()
   async getAll(@Query('category') category?: string) {
-    return this.cms.getFaqs(category);
+    return this.cms.getFaqs(category)
   }
 
   @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateFaqDto) {
-    return this.cms.createFaq(dto);
+    return this.cms.createFaq(dto)
   }
 
   @Roles(Role.ADMIN)
   @Put(':id')
   async update(@Param('id') id: string, @Body() dto: Partial<CreateFaqDto>) {
-    return this.cms.updateFaq(id, dto);
+    return this.cms.updateFaq(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Patch(':id')
   async patch(@Param('id') id: string, @Body() dto: Partial<CreateFaqDto>) {
-    return this.cms.updateFaq(id, dto);
+    return this.cms.updateFaq(id, dto)
   }
 
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    return this.cms.deleteFaq(id);
+    return this.cms.deleteFaq(id)
   }
 }
 
@@ -329,21 +333,21 @@ export class GalleryController {
   @Public()
   @Get()
   async getAll() {
-    return this.cms.getGallery();
+    return this.cms.getGallery()
   }
 
   @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateGalleryDto) {
-    return this.cms.createGalleryItem(dto);
+    return this.cms.createGalleryItem(dto)
   }
 
   @Roles(Role.ADMIN)
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id') id: string) {
-    return this.cms.deleteGalleryItem(id);
+    return this.cms.deleteGalleryItem(id)
   }
 }
 
@@ -357,21 +361,20 @@ export class PortfolioEventsController {
   @Public()
   @Get()
   async getAll() {
-    return this.cms.getPortfolioEventMedia();
+    return this.cms.getPortfolioEventMedia()
   }
 
   @Roles(Role.ADMIN)
   @Post()
   @HttpCode(HttpStatus.OK)
   async set(@Body() body: { eventId: string; imageUrl: string }) {
-    return this.cms.setPortfolioEventImage(body.eventId, body.imageUrl);
+    return this.cms.setPortfolioEventImage(body.eventId, body.imageUrl)
   }
 
   @Roles(Role.ADMIN)
   @Delete(':eventId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('eventId') eventId: string) {
-    return this.cms.deletePortfolioEventImage(eventId);
+    return this.cms.deletePortfolioEventImage(eventId)
   }
 }
-

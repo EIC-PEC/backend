@@ -1,11 +1,7 @@
-import {
-  registerDecorator,
-  ValidationOptions,
-  ValidationArguments,
-} from 'class-validator';
+import { registerDecorator, ValidationOptions, ValidationArguments } from 'class-validator'
 
 export function IsAfter(property: string, validationOptions?: ValidationOptions) {
-  return function (object: Object, propertyName: string) {
+  return function (object: object, propertyName: string) {
     registerDecorator({
       name: 'isAfter',
       target: object.constructor,
@@ -14,27 +10,27 @@ export function IsAfter(property: string, validationOptions?: ValidationOptions)
       options: validationOptions,
       validator: {
         validate(value: any, args: ValidationArguments) {
-          const [relatedPropertyName] = args.constraints;
-          const relatedValue = (args.object as any)[relatedPropertyName];
+          const [relatedPropertyName] = args.constraints
+          const relatedValue = (args.object as any)[relatedPropertyName]
 
           if (!value || !relatedValue) {
             // Let @IsOptional handle missing values
-            return true;
+            return true
           }
 
           // Parse HH:MM format
           const parseTime = (timeString: string) => {
-            const [hours, minutes] = timeString.split(':').map(Number);
-            return hours * 60 + minutes;
-          };
+            const [hours, minutes] = timeString.split(':').map(Number)
+            return hours * 60 + minutes
+          }
 
-          return parseTime(value) > parseTime(relatedValue);
+          return parseTime(value) > parseTime(relatedValue)
         },
         defaultMessage(args: ValidationArguments) {
-          const [relatedPropertyName] = args.constraints;
-          return `${args.property} must be strictly after ${relatedPropertyName}`;
+          const [relatedPropertyName] = args.constraints
+          return `${args.property} must be strictly after ${relatedPropertyName}`
         },
       },
-    });
-  };
+    })
+  }
 }

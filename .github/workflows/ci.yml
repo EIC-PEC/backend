@@ -1,0 +1,35 @@
+name: Backend CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  backend-checks:
+    name: NestJS + Prisma Checks
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "mongodb://localhost:27017/esummit?replicaSet=rs0"
+      JWT_SECRET: "dummy_jwt_secret_for_ci_build_test_1234567890"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - name: Install & Generate Prisma Client
+        run: |
+          npm ci
+          npx prisma generate
+      - name: Lint Backend
+        run: npm run lint
+      - name: Test Backend
+        run: npm test
+      - name: Build Backend
+        run: npm run build

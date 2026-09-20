@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
-import { ConciergeController } from './concierge.controller';
-import { ConciergeService } from './concierge.service';
+import { Module } from '@nestjs/common'
+import { ConciergeController } from './concierge.controller'
+import { ConciergeService } from './concierge.service'
 
 @Module({
   controllers: [ConciergeController],

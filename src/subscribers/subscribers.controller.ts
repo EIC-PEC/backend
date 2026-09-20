@@ -1,19 +1,10 @@
-import {
-  Controller,
-  Post,
-  Get,
-  Delete,
-  Body,
-  Param,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { Public } from '../common/decorators/public.decorator';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '@prisma/client';
-import { SubscribersService } from './subscribers.service';
-import { CreateSubscriberDto } from './dto/create-subscriber.dto';
+import { Controller, Post, Get, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common'
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
+import { Public } from '../common/decorators/public.decorator'
+import { Roles } from '../common/decorators/roles.decorator'
+import { Role } from '@prisma/client'
+import { SubscribersService } from './subscribers.service'
+import { CreateSubscriberDto } from './dto/create-subscriber.dto'
 
 @ApiTags('Subscribers & Newsletter')
 @Controller('subscribers')
@@ -26,7 +17,7 @@ export class SubscribersController {
   @ApiOperation({ summary: 'Subscribe email to E-Summit updates (Public)' })
   @ApiResponse({ status: 200, description: 'Subscribed successfully' })
   async subscribe(@Body() dto: CreateSubscriberDto) {
-    return this.subscribersService.subscribe(dto.email);
+    return this.subscribersService.subscribe(dto.email)
   }
 
   @ApiBearerAuth()
@@ -34,7 +25,7 @@ export class SubscribersController {
   @Get()
   @ApiOperation({ summary: 'Get all email subscribers (Organizer+ only)' })
   async getAll() {
-    return this.subscribersService.getAllSubscribers();
+    return this.subscribersService.getAllSubscribers()
   }
 
   @ApiBearerAuth()
@@ -43,6 +34,6 @@ export class SubscribersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove a subscriber by ID (Organizer+ only)' })
   async remove(@Param('id') id: string) {
-    return this.subscribersService.deleteSubscriber(id);
+    return this.subscribersService.deleteSubscriber(id)
   }
 }

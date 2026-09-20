@@ -1,15 +1,15 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator'
 
 export class VerifyPaymentDto {
   @IsNotEmpty()
   @IsString()
-  orderId: string;
+  orderId: string
 
   @IsNotEmpty()
   @IsString()
-  transactionId: string;
+  transactionId: string
 
   @IsOptional()
   @IsString()
-  signature?: string;
+  signature?: string
 }

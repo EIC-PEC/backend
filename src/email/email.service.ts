@@ -1,49 +1,49 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { Resend } from 'resend';
-import { CircuitBreaker } from '../common/resilience/circuit-breaker';
+import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { Resend } from 'resend'
+import { CircuitBreaker } from '../common/resilience/circuit-breaker'
 
 export interface PassEmailPayload {
-  to: string;
-  recipientName: string;
-  passId: string;
-  passType: string;
-  qrDataUrl: string;
-  college?: string;
-  amountPaid?: number;
+  to: string
+  recipientName: string
+  passId: string
+  passType: string
+  qrDataUrl: string
+  college?: string
+  amountPaid?: number
 }
 
 export interface PasswordResetEmailPayload {
-  to: string;
-  recipientName: string;
-  resetUrl: string;
+  to: string
+  recipientName: string
+  resetUrl: string
 }
 
 @Injectable()
 export class EmailService {
-  private readonly logger = new Logger(EmailService.name);
-  private readonly resend: Resend | null = null;
-  private readonly fromEmail: string;
-  private readonly circuitBreaker: CircuitBreaker;
+  private readonly logger = new Logger(EmailService.name)
+  private readonly resend: Resend | null = null
+  private readonly fromEmail: string
+  private readonly circuitBreaker: CircuitBreaker
 
   constructor(private readonly config: ConfigService) {
-    const apiKey = this.config.get<string>('RESEND_API_KEY');
+    const apiKey = this.config.get<string>('RESEND_API_KEY')
     this.fromEmail =
-      this.config.get<string>('MAIL_FROM') || 'PEC E-Summit 2026 <no-reply@esummit.pec.ac.in>';
+      this.config.get<string>('MAIL_FROM') || 'PEC E-Summit 2026 <no-reply@esummit.pec.ac.in>'
 
     this.circuitBreaker = new CircuitBreaker({
       serviceName: 'ResendEmail',
       failureThreshold: 5,
       resetTimeoutMs: 30000,
-    });
+    })
 
     if (apiKey) {
-      this.resend = new Resend(apiKey);
-      this.logger.log('Resend email provider initialized with CircuitBreaker.');
+      this.resend = new Resend(apiKey)
+      this.logger.log('Resend email provider initialized with CircuitBreaker.')
     } else {
       this.logger.warn(
-        'RESEND_API_KEY not configured. Outgoing emails will be logged to console in development.',
-      );
+        'RESEND_API_KEY not configured. Outgoing emails will be logged to console in development.'
+      )
     }
   }
 
@@ -51,9 +51,9 @@ export class EmailService {
    * Sends branded digital ticket with embedded QR badge to the registered delegate.
    */
   async sendPassConfirmationEmail(payload: PassEmailPayload): Promise<boolean> {
-    const { to, recipientName, passId, passType, qrDataUrl, college, amountPaid } = payload;
+    const { to, recipientName, passId, passType, qrDataUrl, college, amountPaid } = payload
 
-    const formattedPassType = passType.replace(/_/g, ' ');
+    const formattedPassType = passType.replace(/_/g, ' ')
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -116,7 +116,7 @@ export class EmailService {
   </div>
 </body>
 </html>
-    `;
+    `
 
     if (this.resend) {
       return this.circuitBreaker.execute(
@@ -126,34 +126,34 @@ export class EmailService {
             to: [to],
             subject: `Your E-Summit 2026 Digital Pass [${passId}]`,
             html: htmlContent,
-          });
+          })
 
           if (response.error) {
-            throw new Error(`Resend API error: ${response.error.message}`);
+            throw new Error(`Resend API error: ${response.error.message}`)
           }
 
-          this.logger.log(`Pass confirmation email sent to ${to} (ID: ${response.data?.id})`);
-          return true;
+          this.logger.log(`Pass confirmation email sent to ${to} (ID: ${response.data?.id})`)
+          return true
         },
         async () => {
-          this.logger.warn(`[CIRCUIT FALLBACK] Logging email to console for ${to} [${passId}]`);
-          return false;
-        },
-      );
+          this.logger.warn(`[CIRCUIT FALLBACK] Logging email to console for ${to} [${passId}]`)
+          return false
+        }
+      )
     }
 
     // Development logging fallback
     this.logger.log(
-      `[DEV EMAIL DISPATCH] To: ${to} | Pass ID: ${passId} | Type: ${passType} | Name: ${recipientName}`,
-    );
-    return true;
+      `[DEV EMAIL DISPATCH] To: ${to} | Pass ID: ${passId} | Type: ${passType} | Name: ${recipientName}`
+    )
+    return true
   }
 
   /**
    * Sends password reset verification link.
    */
   async sendPasswordResetEmail(payload: PasswordResetEmailPayload): Promise<boolean> {
-    const { to, recipientName, resetUrl } = payload;
+    const { to, recipientName, resetUrl } = payload
 
     const htmlContent = `
 <!DOCTYPE html>
@@ -170,7 +170,7 @@ export class EmailService {
   </div>
 </body>
 </html>
-    `;
+    `
 
     if (this.resend) {
       return this.circuitBreaker.execute(
@@ -180,20 +180,20 @@ export class EmailService {
             to: [to],
             subject: 'Reset your PEC E-Summit Account Password',
             html: htmlContent,
-          });
+          })
           if (response.error) {
-            throw new Error(`Resend API error: ${response.error.message}`);
+            throw new Error(`Resend API error: ${response.error.message}`)
           }
-          return true;
+          return true
         },
         async () => {
-          this.logger.warn(`[CIRCUIT FALLBACK] Password reset email fallback for ${to}`);
-          return false;
-        },
-      );
+          this.logger.warn(`[CIRCUIT FALLBACK] Password reset email fallback for ${to}`)
+          return false
+        }
+      )
     }
 
-    this.logger.log(`[DEV EMAIL DISPATCH] Password reset for ${to} -> ${resetUrl}`);
-    return true;
+    this.logger.log(`[DEV EMAIL DISPATCH] Password reset for ${to} -> ${resetUrl}`)
+    return true
   }
 }

@@ -4,38 +4,38 @@ import {
   Injectable,
   Logger,
   NotFoundException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
-import { verifySignedQrToken } from '../common/utils/qr.util';
-import { VerifyQrDto } from './dto/verify-qr.dto';
-import { ManualLookupDto } from './dto/manual-lookup.dto';
-import { PASS_TIERS_CATALOG } from '../registrations/pass-types.config';
+} from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { PrismaService } from '../prisma/prisma.service'
+import { verifySignedQrToken } from '../common/utils/qr.util'
+import { VerifyQrDto } from './dto/verify-qr.dto'
+import { ManualLookupDto } from './dto/manual-lookup.dto'
+import { PASS_TIERS_CATALOG } from '../registrations/pass-types.config'
 
 @Injectable()
 export class CheckinService {
-  private readonly logger = new Logger(CheckinService.name);
-  private readonly qrSecret: string;
+  private readonly logger = new Logger(CheckinService.name)
+  private readonly qrSecret: string
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly config: ConfigService,
+    private readonly config: ConfigService
   ) {
-    this.qrSecret = this.config.getOrThrow<string>('QR_HMAC_SECRET');
+    this.qrSecret = this.config.getOrThrow<string>('QR_HMAC_SECRET')
   }
 
   async verifyQrCheckIn(dto: VerifyQrDto, volunteerUserId: string) {
-    const cleanToken = dto.qrToken.trim();
-    const gateName = dto.gateName?.trim() || 'MAIN_GATE';
+    const cleanToken = dto.qrToken.trim()
+    const gateName = dto.gateName?.trim() || 'MAIN_GATE'
 
-    const verification = verifySignedQrToken(cleanToken, this.qrSecret);
+    const verification = verifySignedQrToken(cleanToken, this.qrSecret)
     if (!verification.valid || !verification.payload) {
       throw new BadRequestException(
-        `Invalid or forged QR token: ${verification.reason || 'Cryptographic signature mismatch.'}`,
-      );
+        `Invalid or forged QR token: ${verification.reason || 'Cryptographic signature mismatch.'}`
+      )
     }
 
-    const { userId, passId } = verification.payload;
+    const { userId, passId } = verification.payload
 
     const registration = await this.prisma.registration.findFirst({
       where: {
@@ -45,18 +45,18 @@ export class CheckinService {
         user: true,
         payment: true,
       },
-    });
+    })
 
     if (!registration) {
-      throw new NotFoundException(`No registration record found for Pass ID ${passId}.`);
+      throw new NotFoundException(`No registration record found for Pass ID ${passId}.`)
     }
 
     // Revoked passes must NEVER allow gate entry, even with a valid QR signature.
     if (registration.isRevoked) {
-      this.logger.warn(`Revoked pass attempt: ${registration.passId} (${registration.user.name})`);
+      this.logger.warn(`Revoked pass attempt: ${registration.passId} (${registration.user.name})`)
       throw new BadRequestException(
-        `Pass ${registration.passId} has been revoked and cannot be used for entry.`,
-      );
+        `Pass ${registration.passId} has been revoked and cannot be used for entry.`
+      )
     }
 
     if (registration.isCheckedIn) {
@@ -64,7 +64,7 @@ export class CheckinService {
         where: { userId: registration.userId },
         include: { scannedBy: { select: { name: true, email: true } } },
         orderBy: { timestamp: 'desc' },
-      });
+      })
 
       const formattedTime = lastCheckIn
         ? new Date(lastCheckIn.timestamp).toLocaleTimeString('en-US', {
@@ -72,7 +72,7 @@ export class CheckinService {
             minute: '2-digit',
             second: '2-digit',
           })
-        : 'earlier';
+        : 'earlier'
 
       throw new ConflictException({
         statusCode: 409,
@@ -87,7 +87,7 @@ export class CheckinService {
           college: registration.user.college,
           passId: registration.passId,
         },
-      });
+      })
     }
 
     // Atomic Conditional Update: Only updates if isCheckedIn is STILL false
@@ -99,14 +99,14 @@ export class CheckinService {
       data: {
         isCheckedIn: true,
       },
-    });
+    })
 
     if (updateResult.count === 0) {
       const lastCheckIn = await this.prisma.checkIn.findFirst({
         where: { userId: registration.userId },
         include: { scannedBy: { select: { name: true, email: true } } },
         orderBy: { timestamp: 'desc' },
-      });
+      })
 
       throw new ConflictException({
         statusCode: 409,
@@ -114,7 +114,7 @@ export class CheckinService {
         message: `Pass ${registration.passId} was ALREADY checked in. Simultaneous scan collision prevented.`,
         alreadyCheckedIn: true,
         previousCheckIn: lastCheckIn,
-      });
+      })
     }
 
     const checkInRecord = await this.prisma.checkIn.create({
@@ -124,13 +124,13 @@ export class CheckinService {
         gateName,
         timestamp: new Date(),
       },
-    });
+    })
 
-    const catalog = PASS_TIERS_CATALOG.find((t) => t.enumType === registration.passType);
+    const catalog = PASS_TIERS_CATALOG.find((t) => t.enumType === registration.passType)
 
     this.logger.log(
-      `Gate check-in SUCCESS: Pass ${registration.passId} (${registration.user.name}) at ${gateName}`,
-    );
+      `Gate check-in SUCCESS: Pass ${registration.passId} (${registration.user.name}) at ${gateName}`
+    )
 
     return {
       status: 'VERIFIED',
@@ -144,12 +144,12 @@ export class CheckinService {
       tracks: (registration as any).tracks,
       gateName: checkInRecord.gateName,
       checkInTime: checkInRecord.timestamp,
-    };
+    }
   }
 
   async manualLookup(dto: ManualLookupDto, volunteerUserId?: string) {
-    const q = dto.query.trim();
-    const gateName = dto.gateName?.trim() || 'MAIN_GATE';
+    const q = dto.query.trim()
+    const gateName = dto.gateName?.trim() || 'MAIN_GATE'
 
     const attendees = await this.prisma.registration.findMany({
       where: {
@@ -165,22 +165,22 @@ export class CheckinService {
         payment: true,
       },
       take: 10,
-    });
+    })
 
     if (attendees.length === 0) {
-      throw new NotFoundException(`No attendees found matching query "${q}".`);
+      throw new NotFoundException(`No attendees found matching query "${q}".`)
     }
 
     if (dto.performCheckIn && attendees.length === 1) {
-      const reg = attendees[0];
-      
+      const reg = attendees[0]
+
       const updateResult = await this.prisma.registration.updateMany({
         where: { id: reg.id, isCheckedIn: false },
         data: { isCheckedIn: true },
-      });
+      })
 
       if (updateResult.count === 0) {
-        throw new ConflictException(`Pass ${reg.passId} is already checked in.`);
+        throw new ConflictException(`Pass ${reg.passId} is already checked in.`)
       }
 
       await this.prisma.checkIn.create({
@@ -189,12 +189,12 @@ export class CheckinService {
           scannedById: volunteerUserId || reg.userId,
           gateName,
         },
-      });
+      })
 
       return {
         status: 'CHECKED_IN',
         attendee: reg,
-      };
+      }
     }
 
     return {
@@ -210,16 +210,16 @@ export class CheckinService {
         delegatePhone: a.user.phone,
         createdAt: a.createdAt,
       })),
-    };
+    }
   }
 
   async getCheckInStats() {
-    const totalCheckIns = await this.prisma.checkIn.count();
+    const totalCheckIns = await this.prisma.checkIn.count()
 
     const byGate = await this.prisma.checkIn.groupBy({
       by: ['gateName'],
       _count: { id: true },
-    });
+    })
 
     const recentLogs = await this.prisma.checkIn.findMany({
       take: 20,
@@ -228,7 +228,7 @@ export class CheckinService {
         user: { select: { id: true, name: true, college: true, email: true } },
         scannedBy: { select: { id: true, name: true } },
       },
-    });
+    })
 
     return {
       totalCheckIns,
@@ -241,6 +241,6 @@ export class CheckinService {
         scannedBy: l.scannedBy.name,
         timestamp: l.timestamp,
       })),
-    };
+    }
   }
 }

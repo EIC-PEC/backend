@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module } from '@nestjs/common'
 import {
   AlumniController,
   BundleController,
@@ -10,8 +10,8 @@ import {
   SiteConfigController,
   SpeakersController,
   SponsorsController,
-} from './cms.controller';
-import { CmsService } from './cms.service';
+} from './cms.controller'
+import { CmsService } from './cms.service'
 
 @Module({
   controllers: [
@@ -30,4 +30,3 @@ import { CmsService } from './cms.service';
   exports: [CmsService],
 })
 export class CmsModule {}
-

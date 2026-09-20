@@ -8,11 +8,11 @@ import {
   Patch,
   Post,
   Query,
-} from '@nestjs/common';
+} from '@nestjs/common'
 
-import { PassType, Role } from '@prisma/client';
-import { Roles } from '../common/decorators/roles.decorator';
-import { AdminService } from './admin.service';
+import { PassType, Role } from '@prisma/client'
+import { Roles } from '../common/decorators/roles.decorator'
+import { AdminService } from './admin.service'
 
 @Controller('admin')
 @Roles(Role.ADMIN)
@@ -21,7 +21,7 @@ export class AdminController {
 
   @Get('analytics')
   async getAnalytics() {
-    return this.adminService.getAnalytics();
+    return this.adminService.getAnalytics()
   }
 
   @Get('delegates')
@@ -30,52 +30,42 @@ export class AdminController {
     @Query('limit') limit?: string,
     @Query('search') search?: string,
     @Query('passType') passType?: PassType,
-    @Query('isCheckedIn') isCheckedIn?: string,
+    @Query('isCheckedIn') isCheckedIn?: string
   ) {
-    const pageNum = page ? parseInt(page, 10) : 1;
-    const limitNum = limit ? parseInt(limit, 10) : 20;
-    const checkedInBool =
-      isCheckedIn !== undefined ? isCheckedIn === 'true' : undefined;
+    const pageNum = page ? parseInt(page, 10) : 1
+    const limitNum = limit ? parseInt(limit, 10) : 20
+    const checkedInBool = isCheckedIn !== undefined ? isCheckedIn === 'true' : undefined
 
-    return this.adminService.getDelegates(
-      pageNum,
-      limitNum,
-      search,
-      passType,
-      checkedInBool,
-    );
+    return this.adminService.getDelegates(pageNum, limitNum, search, passType, checkedInBool)
   }
 
   @Get('ca-leaderboard')
   async getCaLeaderboard() {
-    return this.adminService.getCaLeaderboard();
+    return this.adminService.getCaLeaderboard()
   }
 
   @Patch('delegates/:id/override')
   @HttpCode(HttpStatus.OK)
   async toggleCheckInOverride(@Param('id') id: string) {
-    return this.adminService.toggleCheckInOverride(id);
+    return this.adminService.toggleCheckInOverride(id)
   }
 
   @Roles(Role.ADMIN)
   @Patch('users/:id/role')
   @HttpCode(HttpStatus.OK)
-  async updateUserRole(
-    @Param('id') userId: string,
-    @Body('role') role: Role,
-  ) {
-    return this.adminService.updateUserRole(userId, role);
+  async updateUserRole(@Param('id') userId: string, @Body('role') role: Role) {
+    return this.adminService.updateUserRole(userId, role)
   }
 
   @Get('delegates/export')
   async exportAllDelegates() {
-    return this.adminService.exportAllDelegates();
+    return this.adminService.exportAllDelegates()
   }
 
   @Post('delegates/:id/resend-pass')
   @HttpCode(HttpStatus.OK)
   async resendPassEmail(@Param('id') id: string) {
-    return this.adminService.resendPassEmail(id);
+    return this.adminService.resendPassEmail(id)
   }
 
   @Get('audit-logs')
@@ -84,20 +74,17 @@ export class AdminController {
     @Query('limit') limit?: string,
     @Query('search') search?: string,
     @Query('action') action?: string,
-    @Query('entity') entity?: string,
+    @Query('entity') entity?: string
   ) {
-    const pageNum = page ? parseInt(page, 10) : 1;
-    const limitNum = limit ? parseInt(limit, 10) : 30;
-    return this.adminService.getAuditLogs(pageNum, limitNum, search, action, entity);
+    const pageNum = page ? parseInt(page, 10) : 1
+    const limitNum = limit ? parseInt(limit, 10) : 30
+    return this.adminService.getAuditLogs(pageNum, limitNum, search, action, entity)
   }
 
   @Roles(Role.ADMIN)
   @Post('audit-logs/prune')
   @HttpCode(HttpStatus.OK)
   async pruneAuditLogs(@Body('olderThanDays') olderThanDays?: number) {
-    return this.adminService.pruneAuditLogs(olderThanDays ?? 90);
+    return this.adminService.pruneAuditLogs(olderThanDays ?? 90)
   }
 }
-
-
-

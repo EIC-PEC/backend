@@ -1,14 +1,14 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import { ConflictException, UnauthorizedException } from '@nestjs/common';
-import { Role } from '@prisma/client';
-import * as argon2 from 'argon2';
-import { AuthService } from './auth.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { Test, TestingModule } from '@nestjs/testing'
+import { ConfigService } from '@nestjs/config'
+import { JwtService } from '@nestjs/jwt'
+import { ConflictException, UnauthorizedException } from '@nestjs/common'
+import { Role } from '@prisma/client'
+import * as argon2 from 'argon2'
+import { AuthService } from './auth.service'
+import { PrismaService } from '../prisma/prisma.service'
 
 describe('AuthService', () => {
-  let service: AuthService;
+  let service: AuthService
 
   const mockPrismaService: any = {
     user: {
@@ -23,7 +23,7 @@ describe('AuthService', () => {
       updateMany: jest.fn(),
     },
     $transaction: jest.fn(async (cb: any) => cb(mockPrismaService)),
-  };
+  }
 
   const mockConfigService = {
     getOrThrow: jest.fn((key: string) => {
@@ -32,17 +32,17 @@ describe('AuthService', () => {
         JWT_ACCESS_TTL: '15m',
         JWT_REFRESH_SECRET: 'test-jwt-refresh-secret-1234567890',
         JWT_REFRESH_TTL: '7d',
-      };
-      return configMap[key] || 'default-secret';
+      }
+      return configMap[key] || 'default-secret'
     }),
-  };
+  }
 
   const mockJwtService = {
     signAsync: jest.fn().mockResolvedValue('mocked-jwt-token'),
-  };
+  }
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    jest.clearAllMocks()
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -51,14 +51,14 @@ describe('AuthService', () => {
         { provide: ConfigService, useValue: mockConfigService },
         { provide: JwtService, useValue: mockJwtService },
       ],
-    }).compile();
+    }).compile()
 
-    service = module.get<AuthService>(AuthService);
-  });
+    service = module.get<AuthService>(AuthService)
+  })
 
   it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
+    expect(service).toBeDefined()
+  })
 
   describe('register', () => {
     const registerDto = {
@@ -67,10 +67,10 @@ describe('AuthService', () => {
       name: 'Test Delegate',
       phone: '+91 98765 43210',
       college: 'Punjab Engineering College',
-    };
+    }
 
     it('should successfully register a new user and return tokens', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.findUnique.mockResolvedValue(null)
       mockPrismaService.user.create.mockResolvedValue({
         id: 'user-id-1',
         email: registerDto.email,
@@ -80,71 +80,71 @@ describe('AuthService', () => {
         role: Role.USER,
         referralCode: 'PEC999999',
         createdAt: new Date(),
-      });
+      })
 
-      const result = await service.register(registerDto, { ipAddress: '127.0.0.1' });
+      const result = await service.register(registerDto, { ipAddress: '127.0.0.1' })
 
-      expect(result).toBeDefined();
-      expect(result.user.email).toBe(registerDto.email);
-      expect(result.tokens.accessToken).toBe('mocked-jwt-token');
-      expect(mockPrismaService.user.create).toHaveBeenCalled();
-    });
+      expect(result).toBeDefined()
+      expect(result.user.email).toBe(registerDto.email)
+      expect(result.tokens.accessToken).toBe('mocked-jwt-token')
+      expect(mockPrismaService.user.create).toHaveBeenCalled()
+    })
 
     it('should throw ConflictException if email is already taken', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'existing-id' });
+      mockPrismaService.user.findUnique.mockResolvedValue({ id: 'existing-id' })
 
-      await expect(
-        service.register(registerDto, { ipAddress: '127.0.0.1' }),
-      ).rejects.toThrow(ConflictException);
-    });
-  });
+      await expect(service.register(registerDto, { ipAddress: '127.0.0.1' })).rejects.toThrow(
+        ConflictException
+      )
+    })
+  })
 
   describe('login', () => {
     const loginDto = {
       email: 'delegate@pecsummit.com',
       password: 'PecSummit@2026',
-    };
+    }
 
     it('should authenticate user with valid credentials and issue tokens', async () => {
-      const passwordHash = await argon2.hash(loginDto.password);
+      const passwordHash = await argon2.hash(loginDto.password)
       mockPrismaService.user.findUnique.mockResolvedValue({
         id: 'user-id-2',
         email: loginDto.email,
         name: 'Delegate User',
         role: Role.USER,
         passwordHash,
-      });
+      })
 
-      const result = await service.login(loginDto, { ipAddress: '127.0.0.1' });
+      const result = await service.login(loginDto, { ipAddress: '127.0.0.1' })
 
-      expect(result).toBeDefined();
-      expect(result.user.email).toBe(loginDto.email);
-      expect(result.tokens.accessToken).toBe('mocked-jwt-token');
-    });
+      expect(result).toBeDefined()
+      expect(result.user.email).toBe(loginDto.email)
+      expect(result.tokens.accessToken).toBe('mocked-jwt-token')
+    })
 
     it('should throw UnauthorizedException if user does not exist', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.findUnique.mockResolvedValue(null)
 
-      await expect(
-        service.login(loginDto, { ipAddress: '127.0.0.1' }),
-      ).rejects.toThrow(UnauthorizedException);
-    });
+      await expect(service.login(loginDto, { ipAddress: '127.0.0.1' })).rejects.toThrow(
+        UnauthorizedException
+      )
+    })
 
     it('should throw UnauthorizedException on invalid password', async () => {
-      const wrongHash = await argon2.hash('DifferentPassword');
+      const wrongHash = await argon2.hash('DifferentPassword')
       mockPrismaService.user.findUnique.mockResolvedValue({
         id: 'user-id-3',
         email: loginDto.email,
         name: 'Delegate User',
         role: Role.USER,
         passwordHash: wrongHash,
-      });
+      })
 
-      await expect(
-        service.login(loginDto, { ipAddress: '127.0.0.1' }),
-      ).rejects.toThrow(UnauthorizedException);
-    });
-  });
+      await expect(service.login(loginDto, { ipAddress: '127.0.0.1' })).rejects.toThrow(
+        UnauthorizedException
+      )
+    })
+  })
 
   describe('me', () => {
     it('should return the user profile with registration passes', async () => {
@@ -161,22 +161,20 @@ describe('AuthService', () => {
             isCheckedIn: false,
           },
         ],
-      });
+      })
 
-      const result = await service.me('user-id-1');
+      const result = await service.me('user-id-1')
 
-      expect(result).toBeDefined();
-      expect(result.user.id).toBe('user-id-1');
-      expect(result.passes).toHaveLength(1);
-      expect(result.passes[0].passId).toBe('PEC-894210');
-    });
+      expect(result).toBeDefined()
+      expect(result.user.id).toBe('user-id-1')
+      expect(result.passes).toHaveLength(1)
+      expect(result.passes[0].passId).toBe('PEC-894210')
+    })
 
     it('should throw UnauthorizedException if account was deleted', async () => {
-      mockPrismaService.user.findUnique.mockResolvedValue(null);
+      mockPrismaService.user.findUnique.mockResolvedValue(null)
 
-      await expect(service.me('non-existent-user')).rejects.toThrow(
-        UnauthorizedException,
-      );
-    });
-  });
-});
+      await expect(service.me('non-existent-user')).rejects.toThrow(UnauthorizedException)
+    })
+  })
+})

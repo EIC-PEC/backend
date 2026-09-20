@@ -1,16 +1,16 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
-import { PassType, PaymentStatus, Role } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { EmailService } from '../email/email.service';
-import QRCode from 'qrcode';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common'
+import { PassType, PaymentStatus, Role } from '@prisma/client'
+import { PrismaService } from '../prisma/prisma.service'
+import { EmailService } from '../email/email.service'
+import QRCode from 'qrcode'
 
 @Injectable()
 export class AdminService {
-  private readonly logger = new Logger(AdminService.name);
+  private readonly logger = new Logger(AdminService.name)
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly emailService: EmailService,
+    private readonly emailService: EmailService
   ) {}
 
   async getAnalytics() {
@@ -53,19 +53,20 @@ export class AdminService {
         },
       }),
       this.prisma.siteConfig.findFirst(),
-    ]);
+    ])
 
-    let targetDelegates = 3000;
+    let targetDelegates = 3000
     if (siteConfig?.stats && typeof siteConfig.stats === 'object') {
-      const statsObj = siteConfig.stats as Record<string, any>;
+      const statsObj = siteConfig.stats as Record<string, any>
       if (statsObj.targetAttendees) {
-        targetDelegates = parseInt(statsObj.targetAttendees, 10) || 3000;
+        targetDelegates = parseInt(statsObj.targetAttendees, 10) || 3000
       }
     }
 
-    const totalRevenue = successfulPayments._sum.amount ?? 0;
-    const targetPercentage = Math.min(100, Math.round((totalDelegates / targetDelegates) * 100));
-    const checkInPercentage = totalDelegates > 0 ? Math.round((totalCheckIns / totalDelegates) * 100) : 0;
+    const totalRevenue = successfulPayments._sum.amount ?? 0
+    const targetPercentage = Math.min(100, Math.round((totalDelegates / targetDelegates) * 100))
+    const checkInPercentage =
+      totalDelegates > 0 ? Math.round((totalCheckIns / totalDelegates) * 100) : 0
 
     return {
       overview: {
@@ -92,7 +93,6 @@ export class AdminService {
         count: c._count.id,
       })),
       recentRegistrations: recentRegistrations.map((r) => ({
-
         id: r.id,
         passId: r.passId,
         passType: r.passType,
@@ -103,7 +103,7 @@ export class AdminService {
         paymentStatus: r.payment?.status ?? PaymentStatus.SUCCESS,
         amount: r.payment?.amount ?? 0,
       })),
-    };
+    }
   }
 
   async getDelegates(
@@ -111,30 +111,30 @@ export class AdminService {
     limit: number = 50,
     search?: string,
     passType?: PassType,
-    isCheckedIn?: boolean,
+    isCheckedIn?: boolean
   ) {
-    const safeLimit = Math.max(1, Math.min(limit, 100));
-    const safePage = Math.max(1, page);
-    const skip = (safePage - 1) * safeLimit;
-    const where: any = {};
+    const safeLimit = Math.max(1, Math.min(limit, 100))
+    const safePage = Math.max(1, page)
+    const skip = (safePage - 1) * safeLimit
+    const where: any = {}
 
     if (passType) {
-      where.passType = passType;
+      where.passType = passType
     }
 
     if (isCheckedIn !== undefined) {
-      where.isCheckedIn = isCheckedIn;
+      where.isCheckedIn = isCheckedIn
     }
 
     if (search && search.trim().length > 0) {
-      const q = search.trim();
+      const q = search.trim()
       where.OR = [
         { passId: { contains: q, mode: 'insensitive' } },
         { user: { is: { name: { contains: q, mode: 'insensitive' } } } },
         { user: { is: { email: { contains: q, mode: 'insensitive' } } } },
         { user: { is: { college: { contains: q, mode: 'insensitive' } } } },
         { user: { is: { phone: { contains: q, mode: 'insensitive' } } } },
-      ];
+      ]
     }
 
     const [total, items] = await Promise.all([
@@ -149,7 +149,7 @@ export class AdminService {
           payment: true,
         },
       }),
-    ]);
+    ])
 
     return {
       page: safePage,
@@ -182,7 +182,7 @@ export class AdminService {
             }
           : null,
       })),
-    };
+    }
   }
 
   /**
@@ -190,8 +190,8 @@ export class AdminService {
    * to maintain MongoDB storage limits.
    */
   async pruneAuditLogs(olderThanDays: number = 90) {
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays);
+    const cutoffDate = new Date()
+    cutoffDate.setDate(cutoffDate.getDate() - olderThanDays)
 
     const deleted = await this.prisma.auditLog.deleteMany({
       where: {
@@ -199,12 +199,12 @@ export class AdminService {
           lt: cutoffDate,
         },
       },
-    });
+    })
 
     return {
       prunedCount: deleted.count,
       cutoffDate: cutoffDate.toISOString(),
-    };
+    }
   }
 
   async getCaLeaderboard() {
@@ -219,26 +219,23 @@ export class AdminService {
           },
         },
       },
-    });
+    })
 
     const ranked = ambassadors.map((ca) => {
-      const totalReferrals = ca.referrals.length;
-      const confirmedSignups = ca.referrals.reduce(
-        (sum, ref) => sum + ref.registrations.length,
-        0,
-      );
+      const totalReferrals = ca.referrals.length
+      const confirmedSignups = ca.referrals.reduce((sum, ref) => sum + ref.registrations.length, 0)
       const conversionRate =
-        totalReferrals > 0 ? Math.round((confirmedSignups / totalReferrals) * 100) : 0;
+        totalReferrals > 0 ? Math.round((confirmedSignups / totalReferrals) * 100) : 0
 
-      let tier = 'AMBASSADOR_INITIATE';
+      let tier = 'AMBASSADOR_INITIATE'
       if (confirmedSignups >= 50) {
-        tier = 'PLATINUM_AMBASSADOR';
+        tier = 'PLATINUM_AMBASSADOR'
       } else if (confirmedSignups >= 25) {
-        tier = 'GOLD_AMBASSADOR';
+        tier = 'GOLD_AMBASSADOR'
       } else if (confirmedSignups >= 10) {
-        tier = 'SILVER_AMBASSADOR';
+        tier = 'SILVER_AMBASSADOR'
       } else if (confirmedSignups >= 1) {
-        tier = 'BRONZE_AMBASSADOR';
+        tier = 'BRONZE_AMBASSADOR'
       }
 
       return {
@@ -251,38 +248,36 @@ export class AdminService {
         confirmedSignups,
         conversionRate,
         tier,
-      };
-    });
+      }
+    })
 
-    ranked.sort((a, b) => b.confirmedSignups - a.confirmedSignups);
+    ranked.sort((a, b) => b.confirmedSignups - a.confirmedSignups)
 
     return ranked.map((item, index) => ({
       rank: index + 1,
       ...item,
-    }));
+    }))
   }
-
 
   async toggleCheckInOverride(registrationId: string) {
     const registration = await this.prisma.registration.findUnique({
       where: { id: registrationId },
-    });
+    })
 
     if (!registration) {
-      throw new NotFoundException(`Registration ${registrationId} not found.`);
+      throw new NotFoundException(`Registration ${registrationId} not found.`)
     }
 
     return this.prisma.registration.update({
       where: { id: registrationId },
       data: { isCheckedIn: !registration.isCheckedIn },
-    });
+    })
   }
 
-
   async updateUserRole(userId: string, newRole: Role) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    const user = await this.prisma.user.findUnique({ where: { id: userId } })
     if (!user) {
-      throw new NotFoundException(`User ${userId} not found.`);
+      throw new NotFoundException(`User ${userId} not found.`)
     }
 
     const [updatedUser] = await this.prisma.$transaction([
@@ -295,7 +290,7 @@ export class AdminService {
         where: { userId, revokedAt: null },
         data: { revokedAt: new Date() },
       }),
-    ]);
+    ])
 
     return {
       message: `User ${updatedUser.email} role updated to ${newRole}. All active sessions invalidated.`,
@@ -305,7 +300,7 @@ export class AdminService {
         email: updatedUser.email,
         role: updatedUser.role,
       },
-    };
+    }
   }
 
   // ── Audit Logs ────────────────────────────────────────────────────────────
@@ -315,28 +310,28 @@ export class AdminService {
     limit: number = 30,
     search?: string,
     action?: string,
-    entity?: string,
+    entity?: string
   ) {
-    const safeLimit = Math.max(1, Math.min(limit, 100));
-    const safePage = Math.max(1, page);
-    const skip = (safePage - 1) * safeLimit;
-    const where: any = {};
+    const safeLimit = Math.max(1, Math.min(limit, 100))
+    const safePage = Math.max(1, page)
+    const skip = (safePage - 1) * safeLimit
+    const where: any = {}
 
     if (action && action !== 'ALL') {
-      where.action = action;
+      where.action = action
     }
 
     if (entity && entity !== 'ALL') {
-      where.entity = entity;
+      where.entity = entity
     }
 
     if (search && search.trim().length > 0) {
-      const q = search.trim();
+      const q = search.trim()
       where.OR = [
         { userEmail: { contains: q, mode: 'insensitive' } },
         { path: { contains: q, mode: 'insensitive' } },
         { ipAddress: { contains: q, mode: 'insensitive' } },
-      ];
+      ]
     }
 
     const [total, items] = await Promise.all([
@@ -347,7 +342,7 @@ export class AdminService {
         take: safeLimit,
         orderBy: { createdAt: 'desc' },
       }),
-    ]);
+    ])
 
     return {
       page: safePage,
@@ -355,7 +350,7 @@ export class AdminService {
       total,
       totalPages: Math.ceil(total / safeLimit) || 1,
       items,
-    };
+    }
   }
 
   // ── Full Attendees Export ──────────────────────────────────────────────────
@@ -367,7 +362,7 @@ export class AdminService {
         user: true,
         payment: true,
       },
-    });
+    })
 
     return items.map((i) => ({
       id: i.id,
@@ -385,7 +380,7 @@ export class AdminService {
       paymentStatus: i.payment?.status ?? 'SUCCESS',
       orderId: i.payment?.orderId ?? 'N/A',
       transactionId: i.payment?.transactionId ?? 'N/A',
-    }));
+    }))
   }
 
   // ── Resend Pass Confirmation Email ────────────────────────────────────────
@@ -394,20 +389,20 @@ export class AdminService {
     const registration = await this.prisma.registration.findUnique({
       where: { id: registrationId },
       include: { user: true, payment: true },
-    });
+    })
 
     if (!registration) {
-      throw new NotFoundException(`Registration ${registrationId} not found.`);
+      throw new NotFoundException(`Registration ${registrationId} not found.`)
     }
 
     if (!registration.user?.email) {
-      throw new BadRequestException('User has no registered email address.');
+      throw new BadRequestException('User has no registered email address.')
     }
 
     const qrDataUrl = await QRCode.toDataURL(registration.qrToken, {
       width: 240,
       margin: 2,
-    });
+    })
 
     await this.emailService.sendPassConfirmationEmail({
       to: registration.user.email,
@@ -417,14 +412,13 @@ export class AdminService {
       qrDataUrl,
       college: registration.user.college ?? undefined,
       amountPaid: registration.amountPaid,
-    });
+    })
 
-    this.logger.log(`Resent pass email for ${registration.passId} to ${registration.user.email}`);
+    this.logger.log(`Resent pass email for ${registration.passId} to ${registration.user.email}`)
 
     return {
       success: true,
       message: `Pass confirmation email successfully resent to ${registration.user.email}`,
-    };
+    }
   }
 }
-
