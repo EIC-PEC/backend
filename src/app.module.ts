@@ -25,6 +25,7 @@ import { IdempotencyInterceptor } from './common/interceptors/idempotency.interc
 import { RequestIdMiddleware } from './common/middleware/request-id.middleware';
 import { ContentTypeMiddleware } from './common/middleware/content-type.middleware';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 @Module({
   imports: [
@@ -68,6 +69,8 @@ import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter'
     { provide: APP_INTERCEPTOR, useClass: AuditInterceptor },
     // Maps Prisma error codes to clean HTTP errors — no schema leakage.
     { provide: APP_FILTER, useClass: PrismaExceptionFilter },
+    // Catch-all for other unexpected errors.
+    { provide: APP_FILTER, useClass: AllExceptionsFilter },
   ],
 })
 
