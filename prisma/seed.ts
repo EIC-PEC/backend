@@ -44,7 +44,7 @@ async function main() {
       id: 'global',
       heroTitle: 'PEC E-SUMMIT 2026',
       heroSubtitle: 'IGNITING ENTREPRENEURSHIP & INNOVATION',
-      summitDates: 'SEPTEMBER 26–27, 2026',
+      summitDates: 'NOVEMBER 14–15, 2026',
       summitVenue: 'Punjab Engineering College, Sector 12, Chandigarh',
       stats: { footfall: '2K+', startups: '100+', workshops: '50+', speakers: '30+', participation: '5K+', alumni: '1000+' },
       contacts: {
@@ -62,7 +62,7 @@ async function main() {
       },
     },
     update: {
-      summitDates: 'SEPTEMBER 26–27, 2026',
+      summitDates: 'NOVEMBER 14–15, 2026',
       stats: { footfall: '2K+', startups: '100+', workshops: '50+', speakers: '30+', participation: '5K+', alumni: '1000+' },
       contacts: {
         faculty: [
@@ -115,22 +115,22 @@ async function main() {
 
   // ── Speakers (18 Authentic Brochure Speakers) ───────────────────────────
   const speakers = [
-    { name: 'Sandeep Jain', title: 'Founder, GeeksforGeeks', role: 'Founder', company: 'GeeksforGeeks', badge: 'EDTECH PIONEER', category: 'keynote', bio: 'Founder of GeeksforGeeks, one of the world’s largest computer science platforms empowering millions.', track: 'EdTech & Scaling Tech Platforms', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', initials: 'SJ', color: '#7ED321', order: 1 },
+    { name: 'Sandeep Jain', title: 'Founder, GeeksforGeeks', role: 'Founder', company: 'GeeksforGeeks', badge: 'EDTECH PIONEER', category: 'keynote', bio: 'Founder of GeeksforGeeks, one of the world’s largest computer science platforms empowering millions.', track: 'EdTech & Scaling Tech Platforms', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', initials: 'SJ', color: '#00F5D4', order: 1 },
     { name: 'Saurabh Munjal', title: 'Co-Founder & CEO, Lahori Zeera', role: 'Co-Founder & CEO', company: 'Lahori Zeera', badge: 'D2C SCALE LEADER', category: 'keynote', bio: 'Co-Founder & CEO of Lahori Zeera, revolutionizing traditional beverage FMCG distribution across India.', track: 'Consumer Brands & FMCG Scale', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', initials: 'SM', color: '#3DD9FF', order: 2 },
     { name: 'Aditi Bhutia Madan', title: 'Founder, Momo Mami', role: 'Founder', company: 'Momo Mami', badge: 'SHARK TANK FOUNDER', category: 'panelist', bio: 'Shark Tank India featured founder, master chef, and entrepreneur scaling Momo Mami into a pan-India brand.', track: 'FoodTech & Women Entrepreneurship', avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80', initials: 'AM', color: '#FF8C42', order: 3 },
-    { name: 'Sourabh Goyal', title: 'Founder, SuccessBrew', role: 'Founder', company: 'SuccessBrew', badge: 'STARTUP ADVISOR', category: 'mentor', bio: 'Founder of SuccessBrew, active angel investor and mentor coaching early-stage founders.', track: 'Venture Building & Growth', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'SG', color: '#7ED321', order: 4 },
+    { name: 'Sourabh Goyal', title: 'Founder, SuccessBrew', role: 'Founder', company: 'SuccessBrew', badge: 'STARTUP ADVISOR', category: 'mentor', bio: 'Founder of SuccessBrew, active angel investor and mentor coaching early-stage founders.', track: 'Venture Building & Growth', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'SG', color: '#00F5D4', order: 4 },
     { name: 'Mandeep Kaur Tangra', title: 'Founder, SimbaQuartz', role: 'Founder', company: 'SimbaQuartz', badge: 'RURAL INNOVATOR', category: 'panelist', bio: 'Pioneered IT and technology empowerment in rural Punjab through SimbaQuartz, creating global software jobs.', track: 'Social Impact & Tech Empowerment', avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80', initials: 'MK', color: '#3DD9FF', order: 5 },
     { name: 'Aahan Khurma', title: 'Co-Founder & CEO, Wellversed', role: 'Co-Founder & CEO', company: 'Wellversed', badge: 'HEALTH & NUTRITION', category: 'panelist', bio: 'Co-Founder & CEO of Wellversed, building Asia’s largest wellness house of brands.', track: 'D2C HealthTech & House of Brands', avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80', initials: 'AK', color: '#9B5CFF', order: 6 },
     { name: 'Drishti Kharbanda', title: 'Founder, Bake Cosmetics', role: 'Founder', company: 'Bake Cosmetics', badge: 'BEAUTY & WELLNESS', category: 'panelist', bio: 'Founder of Bake Cosmetics, pioneering organic skincare and clean beauty formulations.', track: 'Consumer Goods & Digital Marketing', avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80', initials: 'DK', color: '#FF4D3D', order: 7 },
     { name: 'Aseem Ghavri', title: 'Co-Founder, Third Unicorn', role: 'Co-Founder', company: 'Third Unicorn', badge: 'TECH OPERATOR', category: 'keynote', bio: 'Serial entrepreneur and Co-Founder at Third Unicorn building disruptive fintech and fantasy tech products.', track: 'Fintech & Zero to One Ventures', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80', initials: 'AG', color: '#9B5CFF', order: 8 },
     { name: 'Varun Singla', title: 'Founder, Gate Smashers', role: 'Founder', company: 'Gate Smashers', badge: 'TOP EDUCATOR', category: 'keynote', bio: 'Founder of Gate Smashers, India’s most popular computer science lecture channel mentoring 1.5M+ engineers.', track: 'Engineering Education & Content Scale', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', initials: 'VS', color: '#FF4D3D', order: 9 },
-    { name: 'Sarvjeet Singh', title: 'Founder, Finvasia', role: 'Founder', company: 'Finvasia', badge: 'FINTECH TITAN', category: 'investor', bio: 'Founder of Finvasia and Shoonya, leading multinational financial conglomerate operating across trading and banking.', track: 'Global Capital & Algorithmic Trading', avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80', initials: 'SS', color: '#7ED321', order: 10 },
+    { name: 'Sarvjeet Singh', title: 'Founder, Finvasia', role: 'Founder', company: 'Finvasia', badge: 'FINTECH TITAN', category: 'investor', bio: 'Founder of Finvasia and Shoonya, leading multinational financial conglomerate operating across trading and banking.', track: 'Global Capital & Algorithmic Trading', avatarUrl: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=400&q=80', initials: 'SS', color: '#00F5D4', order: 10 },
     { name: 'Paresh Gupta', title: 'Founder, CUETPro / GSEC / Brevity', role: 'Founder', company: 'CUETPro / GSEC', badge: 'ECOSYSTEM STRATEGIST', category: 'mentor', bio: '4x TEDx Speaker, serial entrepreneur, and mentor shaping incubation ecosystems.', track: 'Startup Valuation & Incubation', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'PG', color: '#3DD9FF', order: 11 },
-    { name: 'Sharad Sagar', title: 'Founder & CEO, Dexterity Global', role: 'Founder & CEO', company: 'Dexterity Global', badge: 'GLOBAL LEADER', category: 'keynote', bio: 'Forbes 30 Under 30, Rockefeller Foundation Fellow transforming youth leadership across India.', track: 'Global Leadership & Public Good', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', initials: 'SS', color: '#7ED321', order: 12 },
+    { name: 'Sharad Sagar', title: 'Founder & CEO, Dexterity Global', role: 'Founder & CEO', company: 'Dexterity Global', badge: 'GLOBAL LEADER', category: 'keynote', bio: 'Forbes 30 Under 30, Rockefeller Foundation Fellow transforming youth leadership across India.', track: 'Global Leadership & Public Good', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', initials: 'SS', color: '#00F5D4', order: 12 },
     { name: 'Paritosh Anand', title: 'Founder, WeSmile / Believe Clothing', role: 'Founder', company: 'WeSmile / Believe Clothing', badge: 'CREATOR ECONOMY', category: 'panelist', bio: 'Storyteller, founder of Believe Clothing and WeSmile media inspiring young creators.', track: 'Creator Economy & Brand Storytelling', avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80', initials: 'PA', color: '#FF8C42', order: 13 },
     { name: 'Aditya Arora', title: 'Android Lead, SAP', role: 'Android Lead', company: 'SAP', badge: 'TECH ARCHITECT', category: 'panelist', bio: 'Android Lead at SAP, angel investor in 25+ tech startups, and Microsoft MVP.', track: 'Enterprise Tech & Angel Investing', avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80', initials: 'AA', color: '#3DD9FF', order: 14 },
     { name: 'Nandu Nandkishore', title: 'Former Global CEO, Nestlé Nutrition', role: 'Former Global CEO', company: 'Nestlé Nutrition', badge: 'FORTUNE 500 LEADER', category: 'keynote', bio: 'Former Executive Board Member at Nestlé S.A. and Global CEO of Nestlé Nutrition.', track: 'Global Scale & Corporate Governance', avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80', initials: 'NN', color: '#FF4D3D', order: 15 },
-    { name: 'Daksh Sethi', title: 'Founder & CEO, Guby Rogers', role: 'Founder & CEO', company: 'Guby Rogers', badge: 'YOUTH CATALYST', category: 'panelist', bio: 'Founder of Guby Rogers, keynote speaker, and soft skills accelerator.', track: 'Personal Branding & Career Velocity', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'DS', color: '#7ED321', order: 16 },
+    { name: 'Daksh Sethi', title: 'Founder & CEO, Guby Rogers', role: 'Founder & CEO', company: 'Guby Rogers', badge: 'YOUTH CATALYST', category: 'panelist', bio: 'Founder of Guby Rogers, keynote speaker, and soft skills accelerator.', track: 'Personal Branding & Career Velocity', avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80', initials: 'DS', color: '#00F5D4', order: 16 },
     { name: 'Hardik Banga', title: 'Co-Founder, Adsworm', role: 'Co-Founder', company: 'Adsworm', badge: 'PERFORMANCE MEDIA', category: 'mentor', bio: 'Co-Founder of Adsworm, performance marketing strategist and digital media accelerator.', track: 'Growth Hacking & Ad Networks', avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80', initials: 'HB', color: '#3DD9FF', order: 17 },
     { name: 'Rupinder Singh', title: 'Founder, Bio House / Mentor / Investor', role: 'Founder', company: 'Bio House', badge: 'ANGEL INVESTOR', category: 'investor', bio: 'Founder of Bio House, seasoned life sciences investor and startup mentor.', track: 'BioTech & Seed Stage Deals', avatarUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80', initials: 'RS', color: '#9B5CFF', order: 18 },
   ];
@@ -201,7 +201,7 @@ async function main() {
       valuation: 'Congressional Space Medal of Honor',
       achievement: 'First Indian-Born Woman in Space',
       bio: 'Pioneering astronaut and aeronautical engineer who inspired generations of innovators and space explorers worldwide.',
-      imageUrl: 'https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1790450613/esummit/alumni/OIP.webp',
       linkedin: 'https://linkedin.com/company/ecell-pec',
       order: 1,
     },
@@ -213,7 +213,7 @@ async function main() {
       valuation: 'Father of Indian Fluid Dynamics',
       achievement: 'Architect of India’s Space Program',
       bio: 'Legendary aerospace scientist who spearheaded India’s indigenous space launch vehicle and satellite programs.',
-      imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1790450614/esummit/alumni/OIP__1__jpg.jpg',
       linkedin: 'https://linkedin.com/company/ecell-pec',
       order: 2,
     },
@@ -225,7 +225,7 @@ async function main() {
       valuation: 'Padma Bhushan Awardee',
       achievement: 'PEC Electrical Engineering Alum',
       bio: 'Legendary satirist, filmmaker, and cultural icon who pioneered independent broadcast television in India.',
-      imageUrl: 'https://images.unsplash.com/photo-1463453091185-61582044d556?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1790450615/esummit/alumni/OIP__2__jpg.jpg',
       linkedin: 'https://linkedin.com/company/ecell-pec',
       order: 3,
     },
@@ -237,7 +237,7 @@ async function main() {
       valuation: '$3.3B Unicorn',
       achievement: 'Forbes Global Entrepreneur',
       bio: 'Pioneered auto-tech logistics in India, scaling CARS24 from a seed idea to a multi-billion dollar international marketplace.',
-      imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1790450622/esummit/alumni/1786383606538.png',
       linkedin: 'https://linkedin.com/company/ecell-pec',
       order: 4,
     },
@@ -249,7 +249,7 @@ async function main() {
       valuation: 'Fortune Most Powerful Women',
       achievement: 'Microsoft & Spotify Board Member',
       bio: 'Global technology icon. Served as Chief Technology Officer at Cisco and Motorola, currently leading digital reading platform Fable.',
-      imageUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1790450616/esummit/alumni/OIP__3__jpg.jpg',
       linkedin: 'https://linkedin.com/company/ecell-pec',
       order: 5,
     },
@@ -261,7 +261,7 @@ async function main() {
       valuation: '$40B+ Nasdaq Giant',
       achievement: 'Semiconductor Executive of the Decade',
       bio: 'Transformed Microchip Technology from near-bankruptcy into a global semiconductor leader with 30+ consecutive years of profitability.',
-      imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1790450618/esummit/alumni/OIP__4__jpg.jpg',
       linkedin: 'https://linkedin.com/company/ecell-pec',
       order: 6,
     },
@@ -297,7 +297,7 @@ async function main() {
       valuation: 'National Academy of Engineering',
       achievement: 'Distinguished Academic Leader',
       bio: 'Renowned researcher in thermal sciences and space shuttle heat-shield physics. Led UCLA Engineering to top-tier global research ranking.',
-      imageUrl: 'https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?auto=format&fit=crop&w=800&q=80',
+      imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1790450619/esummit/alumni/OIP__6__jpg.jpg',
       linkedin: 'https://linkedin.com/company/ecell-pec',
       order: 9,
     },
@@ -372,27 +372,30 @@ async function main() {
 
   // ── Portfolio Event Media (13 Activities) ──────────────────────────────────
   const portfolioEventMedia = [
-    { eventId: 'corporate-workshops', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412327/esummit/gallery/pec_pitch_table.png' },
-    { eventId: 'internship-job-fair', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412333/esummit/gallery/pec_startup_fair.png' },
-    { eventId: 'rd-conclave', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412331/esummit/gallery/pec_senate_roundtable.png' },
-    { eventId: 'ipl-auction', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412326/esummit/gallery/pec_pitch.jpg' },
-    { eventId: 'ignite', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412317/esummit/gallery/pec_innovation_stage.png' },
-    { eventId: 'treasure-hunt', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412323/esummit/gallery/pec_lawn_mosaic.png' },
-    { eventId: 'baazar', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412313/esummit/gallery/pec_group.png' },
-    { eventId: 'bizquiz-saasc', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412329/esummit/gallery/pec_senate_hall.png' },
-    { eventId: 'additional-quiz-saasc', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412306/esummit/gallery/pec_auditorium.png' },
-    { eventId: 'campus-ambassador', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412336/esummit/gallery/pec_team.png' },
-    { eventId: 'expert-speakers', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412321/esummit/gallery/pec_keynote_speaker.png' },
-    { eventId: 'funding-conclave', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412311/esummit/gallery/pec_funding_conclave.png' },
-    { eventId: 'case-competition', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412302/esummit/gallery/pec_admin_building.png' },
+    { number: '01', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412327/esummit/gallery/pec_pitch_table.png' },
+    { number: '02', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412333/esummit/gallery/pec_startup_fair.png' },
+    { number: '03', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412331/esummit/gallery/pec_senate_roundtable.png' },
+    { number: '04', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412326/esummit/gallery/pec_pitch.jpg' },
+    { number: '05', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412317/esummit/gallery/pec_innovation_stage.png' },
+    { number: '06', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412323/esummit/gallery/pec_lawn_mosaic.png' },
+    { number: '07', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412313/esummit/gallery/pec_group.png' },
+    { number: '08', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412329/esummit/gallery/pec_senate_hall.png' },
+    { number: '09', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412306/esummit/gallery/pec_auditorium.png' },
+    { number: '10', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412336/esummit/gallery/pec_team.png' },
+    { number: '11', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412321/esummit/gallery/pec_keynote_speaker.png' },
+    { number: '12', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412311/esummit/gallery/pec_funding_conclave.png' },
+    { number: '13', imageUrl: 'https://res.cloudinary.com/dxtvq5s2x/image/upload/v1787412302/esummit/gallery/pec_admin_building.png' },
   ];
 
   for (const p of portfolioEventMedia) {
-    await prisma.portfolioEventItem.upsert({
-      where: { eventId: p.eventId },
-      create: { eventId: p.eventId, imageUrl: p.imageUrl },
-      update: { imageUrl: p.imageUrl },
-    });
+    const ev = await prisma.event.findFirst({ where: { number: p.number } });
+    if (ev) {
+      await prisma.portfolioEventItem.upsert({
+        where: { eventId: ev.id },
+        create: { eventId: ev.id, imageUrl: p.imageUrl },
+        update: { imageUrl: p.imageUrl },
+      });
+    }
   }
   console.log(`  ✓ Portfolio Event Items (${portfolioEventMedia.length})`);
 

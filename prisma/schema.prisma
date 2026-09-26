@@ -198,7 +198,7 @@ model Speaker {
   track     String
   avatarUrl String?
   initials  String
-  color     String   @default("#7ED321")
+  color     String   @default("#00F5D4")
   linkedin  String?
   twitter   String?
   order     Int      @default(0)
