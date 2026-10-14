@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common'
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Logger } from '@nestjs/common'
 import { PassType, PaymentStatus, Role } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { EmailService } from '../email/email.service'
@@ -274,10 +274,23 @@ export class AdminService {
     })
   }
 
-  async updateUserRole(userId: string, newRole: Role) {
+  async updateUserRole(userId: string, newRole: Role, callerUserId?: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } })
     if (!user) {
       throw new NotFoundException(`User ${userId} not found.`)
+    }
+
+    if (callerUserId) {
+      const caller = await this.prisma.user.findUnique({
+        where: { id: callerUserId },
+        select: { role: true },
+      })
+      if (newRole === Role.SUPER_ADMIN && caller?.role !== Role.SUPER_ADMIN) {
+        throw new ForbiddenException('Only super admins can assign the super admin role.')
+      }
+      if (callerUserId === userId && newRole !== caller?.role) {
+        throw new ForbiddenException('Admins cannot modify their own role.')
+      }
     }
 
     const [updatedUser] = await this.prisma.$transaction([
@@ -285,7 +298,6 @@ export class AdminService {
         where: { id: userId },
         data: { role: newRole },
       }),
-      // Revoke all active refresh tokens immediately to prevent privilege persistence (#13)
       this.prisma.refreshToken.updateMany({
         where: { userId, revokedAt: null },
         data: { revokedAt: new Date() },
@@ -356,31 +368,49 @@ export class AdminService {
   // ── Full Attendees Export ──────────────────────────────────────────────────
 
   async exportAllDelegates() {
-    const items = await this.prisma.registration.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: {
-        user: true,
-        payment: true,
-      },
-    })
+    const batchSize = 500
+    const results: any[] = []
+    let cursor: string | undefined = undefined
 
-    return items.map((i) => ({
-      id: i.id,
-      passId: i.passId,
-      passType: i.passType,
-      amountPaid: i.amountPaid,
-      isCheckedIn: i.isCheckedIn,
-      isRevoked: i.isRevoked ?? false,
-      tracks: i.tracks,
-      createdAt: i.createdAt,
-      name: i.user.name,
-      email: i.user.email,
-      phone: i.user.phone || 'N/A',
-      college: i.user.college || 'N/A',
-      paymentStatus: i.payment?.status ?? 'SUCCESS',
-      orderId: i.payment?.orderId ?? 'N/A',
-      transactionId: i.payment?.transactionId ?? 'N/A',
-    }))
+    while (true) {
+      const chunk: any[] = await this.prisma.registration.findMany({
+        take: batchSize,
+        skip: cursor ? 1 : 0,
+        cursor: cursor ? { id: cursor } : undefined,
+        orderBy: { id: 'asc' },
+        include: {
+          user: true,
+          payment: true,
+        },
+      })
+
+      if (chunk.length === 0) break
+
+      for (const i of chunk) {
+        results.push({
+          id: i.id,
+          passId: i.passId,
+          passType: i.passType,
+          amountPaid: i.amountPaid,
+          isCheckedIn: i.isCheckedIn,
+          isRevoked: i.isRevoked ?? false,
+          tracks: i.tracks,
+          createdAt: i.createdAt,
+          name: i.user?.name ?? 'N/A',
+          email: i.user?.email ?? 'N/A',
+          phone: i.user?.phone || 'N/A',
+          college: i.user?.college || 'N/A',
+          paymentStatus: i.payment?.status ?? 'SUCCESS',
+          orderId: i.payment?.orderId ?? 'N/A',
+          transactionId: i.payment?.transactionId ?? 'N/A',
+        })
+      }
+
+      if (chunk.length < batchSize) break
+      cursor = chunk[chunk.length - 1].id
+    }
+
+    return results
   }
 
   // ── Resend Pass Confirmation Email ────────────────────────────────────────

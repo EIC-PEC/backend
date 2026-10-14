@@ -11,8 +11,10 @@ import {
 } from '@nestjs/common'
 
 import { PassType, Role } from '@prisma/client'
+import { CurrentUser } from '../common/decorators/current-user.decorator'
 import { Roles } from '../common/decorators/roles.decorator'
 import { AdminService } from './admin.service'
+import { UpdateRoleDto } from './dto/update-role.dto'
 
 @Controller('admin')
 @Roles(Role.ADMIN)
@@ -32,8 +34,8 @@ export class AdminController {
     @Query('passType') passType?: PassType,
     @Query('isCheckedIn') isCheckedIn?: string
   ) {
-    const pageNum = page ? parseInt(page, 10) : 1
-    const limitNum = limit ? parseInt(limit, 10) : 20
+    const pageNum = Math.max(1, page ? parseInt(page, 10) : 1)
+    const limitNum = Math.min(Math.max(1, limit ? parseInt(limit, 10) : 20), 100)
     const checkedInBool = isCheckedIn !== undefined ? isCheckedIn === 'true' : undefined
 
     return this.adminService.getDelegates(pageNum, limitNum, search, passType, checkedInBool)
@@ -53,8 +55,12 @@ export class AdminController {
   @Roles(Role.ADMIN)
   @Patch('users/:id/role')
   @HttpCode(HttpStatus.OK)
-  async updateUserRole(@Param('id') userId: string, @Body('role') role: Role) {
-    return this.adminService.updateUserRole(userId, role)
+  async updateUserRole(
+    @Param('id') userId: string,
+    @Body() dto: UpdateRoleDto,
+    @CurrentUser('id') adminUserId: string
+  ) {
+    return this.adminService.updateUserRole(userId, dto.role, adminUserId)
   }
 
   @Get('delegates/export')
@@ -76,8 +82,8 @@ export class AdminController {
     @Query('action') action?: string,
     @Query('entity') entity?: string
   ) {
-    const pageNum = page ? parseInt(page, 10) : 1
-    const limitNum = limit ? parseInt(limit, 10) : 30
+    const pageNum = Math.max(1, page ? parseInt(page, 10) : 1)
+    const limitNum = Math.min(Math.max(1, limit ? parseInt(limit, 10) : 30), 100)
     return this.adminService.getAuditLogs(pageNum, limitNum, search, action, entity)
   }
 

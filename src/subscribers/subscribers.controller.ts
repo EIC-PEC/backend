@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Delete, Body, Param, HttpCode, HttpStatus } from '@nestjs/common'
+import { Throttle } from '@nestjs/throttler'
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger'
 import { Public } from '../common/decorators/public.decorator'
 import { Roles } from '../common/decorators/roles.decorator'
@@ -12,6 +13,7 @@ export class SubscribersController {
   constructor(private readonly subscribersService: SubscribersService) {}
 
   @Public()
+  @Throttle({ default: { limit: 15, ttl: 60_000 } })
   @Post()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Subscribe email to E-Summit updates (Public)' })

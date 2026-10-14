@@ -1,5 +1,7 @@
 import * as crypto from 'crypto'
 
+const MAX_QR_AGE_MS = 500 * 24 * 60 * 60 * 1000
+
 export interface QrTokenPayload {
   userId: string
   passId: string
@@ -7,6 +9,9 @@ export interface QrTokenPayload {
 }
 
 export function generateSignedQrToken(userId: string, passId: string, secret: string): string {
+  if (userId.includes(':') || passId.includes(':')) {
+    throw new Error('QR payload parameters must not contain delimiter characters')
+  }
   const timestamp = Date.now()
   const rawPayload = `${userId}:${passId}:${timestamp}`
   const signature = crypto.createHmac('sha256', secret).update(rawPayload).digest('hex')
@@ -26,6 +31,9 @@ export function verifySignedQrToken(
     }
 
     const [userId, passId, timestampStr, signature] = parts
+    if (!/^\d+$/.test(timestampStr)) {
+      return { valid: false, reason: 'Invalid timestamp format' }
+    }
     const rawPayload = `${userId}:${passId}:${timestampStr}`
     const expectedSignature = crypto.createHmac('sha256', secret).update(rawPayload).digest('hex')
 
@@ -42,6 +50,9 @@ export function verifySignedQrToken(
     }
 
     const timestamp = parseInt(timestampStr, 10)
+    if (Date.now() - timestamp > MAX_QR_AGE_MS) {
+      return { valid: false, reason: 'QR token has expired' }
+    }
     return {
       valid: true,
       payload: {

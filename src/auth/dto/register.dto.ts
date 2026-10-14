@@ -31,7 +31,7 @@ export class RegisterDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(10)
+  @Matches(/^(19|20)\d{2}$/, { message: 'gradYear must be a 4-digit year' })
   gradYear?: string
 
   @IsOptional()

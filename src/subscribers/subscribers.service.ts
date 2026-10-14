@@ -17,8 +17,7 @@ export class SubscribersService {
     if (existing) {
       return {
         success: true,
-        message: 'You are already subscribed to E-Summit 2026 updates!',
-        subscriber: existing,
+        message: 'Successfully subscribed to PEC E-Summit 2026 announcements!',
       }
     }
 

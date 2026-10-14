@@ -5,6 +5,7 @@ import type { NestExpressApplication } from '@nestjs/platform-express'
 import cookieParser from 'cookie-parser'
 import compression from 'compression'
 import { json, urlencoded } from 'express'
+import type { Request, Response, NextFunction } from 'express'
 import helmet from 'helmet'
 import { AppModule } from './app.module'
 
@@ -21,19 +22,25 @@ async function bootstrap(): Promise<void> {
   app.set('etag', 'strong')
 
   // 1MB cap for all JSON payloads. The upload route uses multipart — not JSON.
-  app.use(json({ limit: '1mb' }))
+  app.use(
+    json({
+      limit: '1mb',
+      verify: (req: any, _res, buf) => {
+        req.rawBody = buf
+      },
+    })
+  )
   app.use(urlencoded({ extended: true, limit: '1mb' }))
 
   app.setGlobalPrefix('api/v1')
 
-  // ── Helmet: CSP + HSTS (#11) ──────────────────────────────────────────────
   app.use(
     helmet({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'"],
-          styleSrc: ["'self'", "'unsafe-inline'"], // allow inline styles for Swagger UI in dev
+          styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", 'data:', '*.r2.dev', '*.cloudflare.com'],
           connectSrc: ["'self'"],
           fontSrc: ["'self'"],
@@ -42,13 +49,18 @@ async function bootstrap(): Promise<void> {
           upgradeInsecureRequests: isProd ? [] : null,
         },
       },
-      // HSTS: enforce HTTPS for 1 year in production
       hsts: isProd ? { maxAge: 31_536_000, includeSubDomains: true, preload: true } : false,
-      // Don't advertise that we're Express/Node
       hidePoweredBy: true,
       referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+      crossOriginOpenerPolicy: { policy: 'same-origin' },
+      crossOriginResourcePolicy: { policy: 'same-site' },
     })
   )
+
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+    next()
+  })
 
   app.use(cookieParser())
 
@@ -77,8 +89,7 @@ async function bootstrap(): Promise<void> {
         return callback(null, true)
       }
 
-      // Permissive fallback for custom summit domains
-      return callback(null, true)
+      return callback(new Error(`Origin ${origin} not allowed`))
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],

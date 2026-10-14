@@ -34,7 +34,8 @@ export class IdempotencyInterceptor implements NestInterceptor {
       return next.handle()
     }
 
-    const key = `idem:${req.method}:${req.path}:${rawKey.trim()}`
+    const userId = (req as any).user?.id || req.ip || 'anon'
+    const key = `idem:${req.method}:${req.path}:${userId}:${rawKey.trim()}`
     const now = Date.now()
     const existing = IdempotencyInterceptor.cache.get(key)
 

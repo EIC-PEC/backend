@@ -11,7 +11,7 @@ import { PrismaService } from '../prisma/prisma.service'
 import { generateSignedQrToken } from '../common/utils/qr.util'
 import { CreateRegistrationDto } from './dto/create-registration.dto'
 import { PASS_TIERS_CATALOG } from './pass-types.config'
-import { randomInt } from 'node:crypto'
+import { randomBytes, randomInt } from 'node:crypto'
 import { EmailService } from '../email/email.service'
 import QRCode from 'qrcode'
 
@@ -74,7 +74,7 @@ export class RegistrationsService {
 
         let generatedReferralCode: string | undefined
         if (dto.passType === PassType.CAMPUS_AMBASSADOR) {
-          generatedReferralCode = `CA-${randomInt(1000, 9999)}`
+          generatedReferralCode = await this.generateUniqueCaReferralCode()
         }
 
         user = await this.prisma.user.create({
@@ -200,7 +200,7 @@ export class RegistrationsService {
     return Promise.all(passes.map((p) => this.formatRegistrationResponse(p)))
   }
 
-  async getPassById(passId: string) {
+  async getPassById(passId: string, authUserId?: string) {
     const pass = await this.prisma.registration.findUnique({
       where: { passId: passId.trim().toUpperCase() },
       include: {
@@ -218,10 +218,47 @@ export class RegistrationsService {
     })
 
     if (!pass) {
-      throw new NotFoundException(`Pass with ID ${passId} not found.`)
+      throw new NotFoundException('Pass not found.')
     }
 
-    return await this.formatRegistrationResponse(pass)
+    let isAuthorized = false
+    if (authUserId) {
+      if (pass.userId === authUserId) {
+        isAuthorized = true
+      } else {
+        const caller = await this.prisma.user.findUnique({
+          where: { id: authUserId },
+          select: { role: true },
+        })
+        if (caller?.role === Role.ADMIN || caller?.role === Role.GATE) {
+          isAuthorized = true
+        }
+      }
+    }
+
+    if (isAuthorized) {
+      return await this.formatRegistrationResponse(pass)
+    }
+
+    const catalogItem = PASS_TIERS_CATALOG.find((t) => t.enumType === pass.passType)
+    const qrCodeDataUrl = await QRCode.toDataURL(pass.qrToken, {
+      width: 240,
+      margin: 2,
+      color: { dark: '#000000', light: '#FFFFFF' },
+    })
+
+    return {
+      passId: pass.passId,
+      passType: pass.passType,
+      categoryTitle: catalogItem?.title ?? pass.passType,
+      badgeTitle: catalogItem?.badgeTitle ?? 'DELEGATE',
+      isCheckedIn: pass.isCheckedIn,
+      isRevoked: pass.isRevoked ?? false,
+      tracks: pass.tracks,
+      qrToken: pass.qrToken,
+      qrCodeDataUrl,
+      createdAt: pass.createdAt,
+    }
   }
 
   async revokePass(passIdOrRegId: string, revokedByUserId: string) {
@@ -268,7 +305,28 @@ export class RegistrationsService {
     return `PEC-${Date.now().toString().slice(-6)}`
   }
 
-  private async formatRegistrationResponse(reg: any) {
+  private async generateUniqueCaReferralCode(): Promise<string> {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const suffix = Array.from(randomBytes(6), (byte) => alphabet[byte % alphabet.length]).join('')
+      const code = `CA-${suffix}`
+      const taken = await this.prisma.user.findFirst({
+        where: { referralCode: code },
+        select: { id: true },
+      })
+      if (!taken) return code
+    }
+    throw new Error('Could not generate a unique referral code after 5 attempts')
+  }
+
+  private async formatRegistrationResponse(
+    reg: Prisma.RegistrationGetPayload<{
+      include: {
+        user: { select: { id: true; name: true; email: true; college: true; phone: true } }
+        payment: true
+      }
+    }>
+  ) {
     const catalogItem = PASS_TIERS_CATALOG.find((t) => t.enumType === reg.passType)
     const qrCodeDataUrl = await QRCode.toDataURL(reg.qrToken, {
       width: 240,

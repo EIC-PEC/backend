@@ -37,7 +37,7 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
 
     // Rate limiting
     ThrottlerModule.forRoot([
-      { name: 'default', ttl: 60_000, limit: 3000 },
+      { name: 'default', ttl: 60_000, limit: 900 },
       { name: 'auth', ttl: 60_000, limit: 30 },
     ]),
 

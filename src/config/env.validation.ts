@@ -21,6 +21,7 @@ export const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter(Boolean)
     ),
+  FRONTEND_URL: z.string().url().default('http://localhost:3000'),
 
   // ── Data stores ──
   DATABASE_URL: z
@@ -67,6 +68,7 @@ export const envSchema = z.object({
   CLOUDINARY_API_KEY: z.string().optional(),
   CLOUDINARY_API_SECRET: z.string().optional(),
   CLOUDINARY_URL: z.string().optional(),
+  SUMMIT_COUPONS: z.string().optional(),
 })
 
 export type Env = z.infer<typeof envSchema>

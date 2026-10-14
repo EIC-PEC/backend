@@ -5,6 +5,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator'
@@ -23,7 +24,7 @@ export class CreateRegistrationDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(20)
+  @Matches(/^[0-9+\-\s()]{7,20}$/, { message: 'Phone number format is invalid' })
   phone?: string
 
   @IsOptional()
@@ -33,7 +34,7 @@ export class CreateRegistrationDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(10)
+  @Matches(/^(19|20)\d{2}$/, { message: 'gradYear must be a 4-digit year' })
   gradYear?: string
 
   @IsOptional()

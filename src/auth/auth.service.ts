@@ -47,6 +47,11 @@ export class AuthService {
     private readonly config: ConfigService
   ) {}
 
+  private get passwordResetSecret(): string {
+    const base = this.config.getOrThrow<string>('JWT_ACCESS_SECRET')
+    return createHmac('sha256', base).update('pw-reset').digest('hex')
+  }
+
   // ── Public API ────────────────────────────────────────────────────────────
 
   async register(dto: RegisterDto, session: SessionContext) {
@@ -283,7 +288,7 @@ export class AuthService {
     }
 
     const rawToken = randomBytes(32).toString('hex')
-    const tokenHash = createHmac('sha256', this.config.getOrThrow('JWT_ACCESS_SECRET'))
+    const tokenHash = createHmac('sha256', this.passwordResetSecret)
       .update(rawToken)
       .digest('hex')
 
@@ -297,7 +302,8 @@ export class AuthService {
       }),
     ])
 
-    const resetUrl = `${this.config.get('FRONTEND_URL') ?? 'http://localhost:3001'}/reset-password?token=${rawToken}`
+    const frontendBase = this.config.get<string>('FRONTEND_URL') || 'http://localhost:3000'
+    const resetUrl = `${frontendBase}/reset-password?token=${rawToken}`
 
     // In dev: log the reset URL. In production: send via email.
     if (this.config.get('NODE_ENV') !== 'production') {
@@ -312,7 +318,7 @@ export class AuthService {
   }
 
   async resetPassword(rawToken: string, newPassword: string): Promise<{ message: string }> {
-    const tokenHash = createHmac('sha256', this.config.getOrThrow('JWT_ACCESS_SECRET'))
+    const tokenHash = createHmac('sha256', this.passwordResetSecret)
       .update(rawToken)
       .digest('hex')
 

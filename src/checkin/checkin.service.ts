@@ -149,6 +149,9 @@ export class CheckinService {
 
   async manualLookup(dto: ManualLookupDto, volunteerUserId?: string) {
     const q = dto.query.trim()
+    if (q.length < 3) {
+      throw new BadRequestException('Search query must be at least 3 characters long.')
+    }
     const gateName = dto.gateName?.trim() || 'MAIN_GATE'
 
     const attendees = await this.prisma.registration.findMany({
@@ -207,7 +210,7 @@ export class CheckinService {
         delegateName: a.user.name,
         delegateEmail: a.user.email,
         delegateCollege: a.user.college,
-        delegatePhone: a.user.phone,
+        delegatePhone: a.user.phone ? `${a.user.phone.slice(0, 3)}****${a.user.phone.slice(-3)}` : null,
         createdAt: a.createdAt,
       })),
     }

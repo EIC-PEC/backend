@@ -26,22 +26,31 @@ export class PaymentsService {
     this.webhookSecret = this.config.get<string>('RAZORPAY_WEBHOOK_SECRET')
   }
 
+  private getCoupons(): Record<string, { discountPercent: number; description: string }> {
+    const envCoupons = this.config.get<string>('SUMMIT_COUPONS')
+    if (envCoupons) {
+      try {
+        const parsed = JSON.parse(envCoupons)
+        if (typeof parsed === 'object' && parsed !== null) {
+          return parsed
+        }
+      } catch {}
+    }
+    return {
+      STUDENT50: { discountPercent: 50, description: 'Student Community 50% Discount' },
+      SUMMIT20: { discountPercent: 20, description: 'Summit Special 20% Discount' },
+    }
+  }
+
   async validateCoupon(code: string) {
     if (!code || typeof code !== 'string') {
       throw new BadRequestException('Coupon code is required.')
     }
     const cleanCode = code.trim().toUpperCase()
-    const VALID_COUPONS: Record<string, { discountPercent: number; description: string }> = {
-      EARLYBIRD: { discountPercent: 100, description: 'Early Bird 100% Free Delegate Pass' },
-      PECFAM: { discountPercent: 100, description: 'PEC Internal 100% Waiver' },
-      FREEPASS: { discountPercent: 100, description: 'Promotional 100% Full Waiver' },
-      STUDENT50: { discountPercent: 50, description: 'Student Community 50% Discount' },
-      SUMMIT20: { discountPercent: 20, description: 'Summit Special 20% Discount' },
-    }
-
-    const coupon = VALID_COUPONS[cleanCode]
+    const coupons = this.getCoupons()
+    const coupon = coupons[cleanCode]
     if (!coupon) {
-      throw new NotFoundException(`Invalid or expired promo code: ${cleanCode}`)
+      throw new NotFoundException('Invalid or expired promo code.')
     }
 
     return {
@@ -59,7 +68,7 @@ export class PaymentsService {
     })
 
     if (!registration) {
-      throw new NotFoundException(`Pass with ID ${dto.passId} not found.`)
+      throw new NotFoundException('Pass not found.')
     }
 
     if (!registration.payment) {
@@ -83,7 +92,7 @@ export class PaymentsService {
     }
   }
 
-  async verifyPayment(dto: VerifyPaymentDto) {
+  async verifyPayment(dto: VerifyPaymentDto, authUserId?: string) {
     const payment = await this.prisma.payment.findUnique({
       where: { orderId: dto.orderId },
       include: {
@@ -96,15 +105,24 @@ export class PaymentsService {
     })
 
     if (!payment) {
-      throw new NotFoundException(`Payment record for order ${dto.orderId} not found.`)
+      throw new NotFoundException('Payment record for order not found.')
+    }
+
+    if (authUserId) {
+      const isOwner = payment.registrations?.some((r) => r.userId === authUserId)
+      if (!isOwner) {
+        throw new BadRequestException('Payment does not belong to the authenticated user.')
+      }
+    }
+
+    if (payment.transactionId && payment.transactionId !== dto.transactionId) {
+      throw new BadRequestException('Transaction ID mismatch for this order.')
     }
 
     if (payment.status === PaymentStatus.SUCCESS) {
       return { success: true, message: 'Payment was already verified and confirmed.', payment }
     }
 
-    // Signature verification is unconditional — a missing secret is a misconfiguration,
-    // not a reason to skip the check and mark payments as SUCCESS for free.
     if (!this.keySecret) {
       throw new BadRequestException('Payment gateway is not configured. Contact the administrator.')
     }
@@ -145,7 +163,6 @@ export class PaymentsService {
 
     this.logger.log(`Payment confirmed for Order ${dto.orderId}`)
 
-    // Asynchronously dispatch pass email with QR badge
     const reg = payment.registrations?.[0]
     if (reg && reg.user) {
       QRCode.toDataURL(reg.qrToken, { width: 240, margin: 2 })
@@ -171,20 +188,32 @@ export class PaymentsService {
   }
 
   async handleWebhook(rawBody: string | Buffer, signatureHeader: string | undefined, payload: any) {
-    if (this.webhookSecret && signatureHeader) {
-      const expectedSignature = crypto
-        .createHmac('sha256', this.webhookSecret)
-        .update(typeof rawBody === 'string' ? rawBody : rawBody.toString('utf-8'))
-        .digest('hex')
+    if (!this.webhookSecret) {
+      throw new BadRequestException('Razorpay webhook secret is not configured.')
+    }
+    if (!signatureHeader) {
+      throw new BadRequestException('Missing Razorpay signature header.')
+    }
 
-      if (expectedSignature !== signatureHeader) {
-        throw new BadRequestException('Invalid Razorpay webhook signature.')
-      }
+    const expectedSignature = crypto
+      .createHmac('sha256', this.webhookSecret)
+      .update(typeof rawBody === 'string' ? rawBody : rawBody.toString('utf-8'))
+      .digest('hex')
+
+    if (expectedSignature !== signatureHeader) {
+      throw new BadRequestException('Invalid Razorpay webhook signature.')
     }
 
     const event = payload?.event
     const orderId = payload?.payload?.payment?.entity?.order_id
     const transactionId = payload?.payload?.payment?.entity?.id
+
+    const sanitizedLog = {
+      event,
+      orderId,
+      transactionId,
+      timestamp: new Date().toISOString(),
+    }
 
     if (event === 'order.paid' || event === 'payment.captured') {
       if (orderId) {
@@ -195,7 +224,7 @@ export class PaymentsService {
             data: {
               status: PaymentStatus.SUCCESS,
               transactionId: transactionId || payment.transactionId,
-              rawWebhookLog: payload,
+              rawWebhookLog: sanitizedLog,
             },
           })
         }
@@ -206,7 +235,7 @@ export class PaymentsService {
           where: { orderId },
           data: {
             status: PaymentStatus.FAILED,
-            rawWebhookLog: payload,
+            rawWebhookLog: sanitizedLog,
           },
         })
       }

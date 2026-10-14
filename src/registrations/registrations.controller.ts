@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common'
+import { Throttle } from '@nestjs/throttler'
 import { Role } from '@prisma/client'
 import { Public } from '../common/decorators/public.decorator'
 import { Roles } from '../common/decorators/roles.decorator'
@@ -17,6 +18,7 @@ export class RegistrationsController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 15, ttl: 60_000 } })
   @Post('create')
   @HttpCode(HttpStatus.CREATED)
   async createRegistration(
@@ -39,8 +41,12 @@ export class RegistrationsController {
   }
 
   @Public()
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @Get(':passId')
-  async getPassById(@Param('passId') passId: string) {
-    return this.registrationsService.getPassById(passId)
+  async getPassById(
+    @Param('passId') passId: string,
+    @CurrentUser('id') authUserId?: string
+  ) {
+    return this.registrationsService.getPassById(passId, authUserId)
   }
 }
