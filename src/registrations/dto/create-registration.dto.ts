@@ -49,6 +49,11 @@ export class CreateRegistrationDto {
   passType: PassType
 
   @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  tierId?: string
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   tracks?: string[]

@@ -34,11 +34,15 @@ export class CmsService {
 
   async getSiteConfig() {
     return this.cacheService.getOrSet('cms:config', CMS_CACHE_TTL_SECONDS, async () => {
-      return this.prisma.siteConfig.upsert({
+      let config = await this.prisma.siteConfig.findUnique({
         where: { id: 'global' },
-        create: { id: 'global' },
-        update: {},
       })
+      if (!config) {
+        config = await this.prisma.siteConfig.create({
+          data: { id: 'global' },
+        })
+      }
+      return config
     })
   }
 
@@ -48,11 +52,15 @@ export class CmsService {
       stats: dto.stats as Prisma.InputJsonValue,
       contacts: dto.contacts as Prisma.InputJsonValue,
     }
-    const res = await this.prisma.siteConfig.upsert({
-      where: { id: 'global' },
-      create: { id: 'global', ...(data as Prisma.SiteConfigCreateInput) },
-      update: data,
-    })
+    const existing = await this.prisma.siteConfig.findUnique({ where: { id: 'global' } })
+    const res = existing
+      ? await this.prisma.siteConfig.update({
+          where: { id: 'global' },
+          data,
+        })
+      : await this.prisma.siteConfig.create({
+          data: { id: 'global', ...(data as Prisma.SiteConfigCreateInput) },
+        })
     this.invalidateCmsCache('config')
     return res
   }
@@ -518,11 +526,15 @@ export class CmsService {
   }
 
   async setPortfolioEventImage(eventId: string, imageUrl: string) {
-    const res = await this.prisma.portfolioEventItem.upsert({
-      where: { eventId },
-      update: { imageUrl: imageUrl.trim() },
-      create: { eventId, imageUrl: imageUrl.trim() },
-    })
+    const existing = await this.prisma.portfolioEventItem.findUnique({ where: { eventId } })
+    const res = existing
+      ? await this.prisma.portfolioEventItem.update({
+          where: { eventId },
+          data: { imageUrl: imageUrl.trim() },
+        })
+      : await this.prisma.portfolioEventItem.create({
+          data: { eventId, imageUrl: imageUrl.trim() },
+        })
     this.invalidateCmsCache('portfolio_media')
     return res
   }

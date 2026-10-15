@@ -126,7 +126,12 @@ export class CheckinService {
       },
     })
 
-    const catalog = PASS_TIERS_CATALOG.find((t) => t.enumType === registration.passType)
+    const catalog =
+      PASS_TIERS_CATALOG.find((t) => (registration as any).tracks?.includes(t.title)) ||
+      PASS_TIERS_CATALOG.find(
+        (t) => t.enumType === registration.passType && t.feeAmount === registration.amountPaid
+      ) ||
+      PASS_TIERS_CATALOG.find((t) => t.enumType === registration.passType)
 
     this.logger.log(
       `Gate check-in SUCCESS: Pass ${registration.passId} (${registration.user.name}) at ${gateName}`

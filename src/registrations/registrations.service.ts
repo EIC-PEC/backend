@@ -46,10 +46,31 @@ export class RegistrationsService {
   }
 
   async createRegistration(dto: CreateRegistrationDto, authUserId?: string) {
-    const catalogItem = PASS_TIERS_CATALOG.find((t) => t.enumType === dto.passType)
-    if (!catalogItem) {
-      throw new BadRequestException(`Unknown pass type: ${dto.passType}`)
+    // Resolve catalog item by tierId, title in tracks, or passType enum fallback
+    let catalogItem = dto.tierId
+      ? PASS_TIERS_CATALOG.find((t) => t.id === dto.tierId)
+      : undefined
+
+    if (!catalogItem && dto.tracks && dto.tracks.length > 0) {
+      catalogItem = PASS_TIERS_CATALOG.find((t) =>
+        dto.tracks!.some(
+          (track) =>
+            track.toLowerCase() === t.title.toLowerCase() ||
+            track.toLowerCase() === t.id.toLowerCase()
+        )
+      )
     }
+
+    if (!catalogItem) {
+      catalogItem = PASS_TIERS_CATALOG.find((t) => t.enumType === dto.passType)
+    }
+
+    if (!catalogItem) {
+      throw new BadRequestException(`Unknown pass type or tier: ${dto.tierId || dto.passType}`)
+    }
+
+    // Synchronize enum with matched catalog item
+    dto.passType = catalogItem.enumType
 
     let user: User
     if (authUserId) {
@@ -96,13 +117,16 @@ export class RegistrationsService {
     const duplicate = await this.prisma.registration.findFirst({
       where: {
         userId: user.id,
-        passType: dto.passType,
+        OR: [
+          { tracks: { has: catalogItem.title } },
+          { passType: catalogItem.enumType, amountPaid: catalogItem.feeAmount },
+        ],
       },
     })
 
     if (duplicate) {
       throw new ConflictException(
-        `User ${user.email} is already registered with pass ID ${duplicate.passId}.`
+        `User ${user.email} is already registered for ${catalogItem.title} (Pass ID: ${duplicate.passId}).`
       )
     }
 
@@ -110,6 +134,10 @@ export class RegistrationsService {
     const qrToken = generateSignedQrToken(user.id, passId, this.qrSecret)
     const fee = catalogItem.feeAmount
     const isPaid = fee > 0
+
+    const finalTracks = Array.from(
+      new Set([catalogItem.title, ...(dto.tracks && dto.tracks.length > 0 ? dto.tracks : ['General Sessions'])])
+    )
 
     const registration = await this.prisma.$transaction(async (tx) => {
       let paymentId: string | undefined
@@ -135,7 +163,7 @@ export class RegistrationsService {
           amountPaid: fee,
           qrToken,
           paymentId,
-          tracks: dto.tracks && dto.tracks.length > 0 ? dto.tracks : ['General Sessions'],
+          tracks: finalTracks,
           isCheckedIn: false,
         },
         include: {
@@ -269,7 +297,10 @@ export class RegistrationsService {
   }
 
   private async formatRegistrationResponse(reg: any) {
-    const catalogItem = PASS_TIERS_CATALOG.find((t) => t.enumType === reg.passType)
+    const catalogItem =
+      PASS_TIERS_CATALOG.find((t) => reg.tracks?.includes(t.title)) ||
+      PASS_TIERS_CATALOG.find((t) => t.enumType === reg.passType && t.feeAmount === reg.amountPaid) ||
+      PASS_TIERS_CATALOG.find((t) => t.enumType === reg.passType)
     const qrCodeDataUrl = await QRCode.toDataURL(reg.qrToken, {
       width: 240,
       margin: 2,
