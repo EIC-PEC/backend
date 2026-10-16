@@ -101,9 +101,12 @@ export class RegistrationsService {
     })
 
     if (duplicate) {
-      throw new ConflictException(
-        `User ${user.email} is already registered with pass ID ${duplicate.passId}.`
-      )
+      throw new ConflictException({
+        statusCode: 409,
+        message: `User ${user.email} is already registered with pass ID ${duplicate.passId}.`,
+        passId: duplicate.passId,
+        registration: duplicate,
+      })
     }
 
     const passId = await this.generateUniquePassId()
