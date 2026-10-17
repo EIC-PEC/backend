@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config'
 import { PaymentStatus } from '@prisma/client'
 import * as crypto from 'crypto'
 
-import QRCode from 'qrcode'
+import { generateQrDataUrl } from '../common/utils/qr.util'
 import { PrismaService } from '../prisma/prisma.service'
 import { EmailService } from '../email/email.service'
 import { CreateOrderDto } from './dto/create-order.dto'
@@ -165,7 +165,7 @@ export class PaymentsService {
 
     const reg = payment.registrations?.[0]
     if (reg && reg.user) {
-      QRCode.toDataURL(reg.qrToken, { width: 240, margin: 2 })
+      generateQrDataUrl(reg.qrToken)
         .then((qrDataUrl) => {
           return this.emailService.sendPassConfirmationEmail({
             to: reg.user.email,

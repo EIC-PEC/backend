@@ -6,6 +6,8 @@ import * as argon2 from 'argon2'
 import { createHmac, randomBytes, randomUUID } from 'node:crypto'
 import { PrismaService } from '../prisma/prisma.service'
 import { durationToMs } from '../common/utils/duration'
+import { generateUniqueReferralCode } from '../common/utils/referral.util'
+import { EmailService } from '../email/email.service'
 import type { AccessTokenPayload } from '../common/types/authenticated-user'
 import { RegisterDto } from './dto/register.dto'
 import { LoginDto } from './dto/login.dto'
@@ -44,7 +46,8 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
-    private readonly config: ConfigService
+    private readonly config: ConfigService,
+    private readonly emailService: EmailService
   ) {}
 
   private get passwordResetSecret(): string {
@@ -81,7 +84,7 @@ export class AuthService {
         gradYear: dto.gradYear,
         city: dto.city,
         role: Role.USER,
-        referralCode: await this.generateUniqueReferralCode(),
+        referralCode: await generateUniqueReferralCode(this.prisma, 'PEC'),
         referredById: referrer?.id ?? null,
       },
       select: PUBLIC_USER_SELECT,
@@ -251,24 +254,6 @@ export class AuthService {
     }
   }
 
-  /** Every user gets a CA referral code; collisions are retried, not ignored. */
-  private async generateUniqueReferralCode(): Promise<string> {
-    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no I/O/0/1
-
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const suffix = Array.from(randomBytes(6), (byte) => alphabet[byte % alphabet.length]).join('')
-      const code = `PEC${suffix}`
-
-      const taken = await this.prisma.user.findFirst({
-        where: { referralCode: code },
-        select: { id: true },
-      })
-      if (!taken) return code
-    }
-
-    throw new Error('Could not generate a unique referral code after 5 attempts')
-  }
-
   // ── Password Reset ─────────────────────────────────────────────────────────
 
   /**
@@ -305,14 +290,17 @@ export class AuthService {
     const frontendBase = this.config.get<string>('FRONTEND_URL') || 'http://localhost:3000'
     const resetUrl = `${frontendBase}/reset-password?token=${rawToken}`
 
-    // In dev: log the reset URL. In production: send via email.
     if (this.config.get('NODE_ENV') !== 'production') {
       this.logger.warn(`[DEV] Password reset URL for ${email}: ${resetUrl}`)
-    } else {
-      // TODO: wire this to your email provider (Resend / Nodemailer).
-      // Example: await this.mailerService.sendPasswordReset(user.email, resetUrl);
-      this.logger.log(`Password reset email would be sent to ${email}`)
     }
+
+    await this.emailService
+      .sendPasswordResetEmail({
+        to: user.email,
+        recipientName: user.name,
+        resetUrl,
+      })
+      .catch((err) => this.logger.error(`Password reset email dispatch failed: ${err.message}`))
 
     return { message: 'If that email is registered, a reset link has been sent.' }
   }

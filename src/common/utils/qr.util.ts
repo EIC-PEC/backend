@@ -65,3 +65,12 @@ export function verifySignedQrToken(
     return { valid: false, reason: `Token decode error: ${(error as Error).message}` }
   }
 }
+
+export async function generateQrDataUrl(token: string): Promise<string> {
+  const QRCode = (await import('qrcode')).default
+  return QRCode.toDataURL(token, {
+    width: 240,
+    margin: 2,
+    color: { dark: '#000000', light: '#FFFFFF' },
+  })
+}

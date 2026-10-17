@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException,
 import { PassType, PaymentStatus, Role } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
 import { EmailService } from '../email/email.service'
-import QRCode from 'qrcode'
+import { generateQrDataUrl } from '../common/utils/qr.util'
 
 @Injectable()
 export class AdminService {
@@ -88,10 +88,9 @@ export class AdminService {
         college: c.college,
         count: c._count.id,
       })),
-      collegeBreakdown: topColleges.map((c) => ({
-        college: c.college,
-        count: c._count.id,
-      })),
+      get collegeBreakdown() {
+        return this.topColleges
+      },
       recentRegistrations: recentRegistrations.map((r) => ({
         id: r.id,
         passId: r.passId,
@@ -429,10 +428,7 @@ export class AdminService {
       throw new BadRequestException('User has no registered email address.')
     }
 
-    const qrDataUrl = await QRCode.toDataURL(registration.qrToken, {
-      width: 240,
-      margin: 2,
-    })
+    const qrDataUrl = await generateQrDataUrl(registration.qrToken)
 
     await this.emailService.sendPassConfirmationEmail({
       to: registration.user.email,

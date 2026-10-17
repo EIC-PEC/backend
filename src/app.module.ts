@@ -11,7 +11,6 @@ import { PaymentsModule } from './payments/payments.module'
 import { CheckinModule } from './checkin/checkin.module'
 import { CmsModule } from './cms/cms.module'
 
-import { ConciergeModule } from './concierge/concierge.module'
 import { AdminModule } from './admin/admin.module'
 import { StorageModule } from './storage/storage.module'
 import { SubscribersModule } from './subscribers/subscribers.module'
@@ -49,7 +48,6 @@ import { AllExceptionsFilter } from './common/filters/all-exceptions.filter'
     PaymentsModule,
     CheckinModule,
     CmsModule,
-    ConciergeModule,
     AdminModule,
     StorageModule,
     SubscribersModule,

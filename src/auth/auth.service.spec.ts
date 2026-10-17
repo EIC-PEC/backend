@@ -50,6 +50,10 @@ describe('AuthService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: JwtService, useValue: mockJwtService },
+        {
+          provide: (await import('../email/email.service')).EmailService,
+          useValue: { sendPasswordResetEmail: jest.fn().mockResolvedValue(true) },
+        },
       ],
     }).compile()
 

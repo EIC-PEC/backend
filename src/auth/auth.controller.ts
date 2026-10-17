@@ -4,7 +4,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  NotImplementedException,
   Post,
   Req,
   Res,
@@ -77,16 +76,6 @@ export class AuthController {
   @Get('me')
   async me(@CurrentUser('id') userId: string) {
     return this.auth.me(userId)
-  }
-
-  @Public()
-  @Post('google')
-  google(): never {
-    // Planned in §4.1. Deliberately explicit rather than silently absent, so the
-    // ESUMMIT client gets an honest signal if it wires the button up early.
-    throw new NotImplementedException(
-      'Google OAuth sign-in is not implemented yet. Use POST /api/v1/auth/login.'
-    )
   }
 
   @Public()

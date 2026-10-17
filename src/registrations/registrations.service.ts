@@ -8,12 +8,12 @@ import {
 import { ConfigService } from '@nestjs/config'
 import { PassType, PaymentStatus, Prisma, Role, User } from '@prisma/client'
 import { PrismaService } from '../prisma/prisma.service'
-import { generateSignedQrToken } from '../common/utils/qr.util'
+import { generateSignedQrToken, generateQrDataUrl } from '../common/utils/qr.util'
+import { generateUniqueReferralCode } from '../common/utils/referral.util'
 import { CreateRegistrationDto } from './dto/create-registration.dto'
 import { PASS_TIERS_CATALOG } from './pass-types.config'
-import { randomBytes, randomInt } from 'node:crypto'
+import { randomInt } from 'node:crypto'
 import { EmailService } from '../email/email.service'
-import QRCode from 'qrcode'
 
 @Injectable()
 export class RegistrationsService {
@@ -74,7 +74,7 @@ export class RegistrationsService {
 
         let generatedReferralCode: string | undefined
         if (dto.passType === PassType.CAMPUS_AMBASSADOR) {
-          generatedReferralCode = await this.generateUniqueCaReferralCode()
+          generatedReferralCode = await generateUniqueReferralCode(this.prisma, 'CA-')
         }
 
         user = await this.prisma.user.create({
@@ -244,11 +244,7 @@ export class RegistrationsService {
     }
 
     const catalogItem = PASS_TIERS_CATALOG.find((t) => t.enumType === pass.passType)
-    const qrCodeDataUrl = await QRCode.toDataURL(pass.qrToken, {
-      width: 240,
-      margin: 2,
-      color: { dark: '#000000', light: '#FFFFFF' },
-    })
+    const qrCodeDataUrl = await generateQrDataUrl(pass.qrToken)
 
     return {
       passId: pass.passId,
@@ -308,20 +304,6 @@ export class RegistrationsService {
     return `PEC-${Date.now().toString().slice(-6)}`
   }
 
-  private async generateUniqueCaReferralCode(): Promise<string> {
-    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      const suffix = Array.from(randomBytes(6), (byte) => alphabet[byte % alphabet.length]).join('')
-      const code = `CA-${suffix}`
-      const taken = await this.prisma.user.findFirst({
-        where: { referralCode: code },
-        select: { id: true },
-      })
-      if (!taken) return code
-    }
-    throw new Error('Could not generate a unique referral code after 5 attempts')
-  }
-
   private async formatRegistrationResponse(
     reg: Prisma.RegistrationGetPayload<{
       include: {
@@ -331,11 +313,7 @@ export class RegistrationsService {
     }>
   ) {
     const catalogItem = PASS_TIERS_CATALOG.find((t) => t.enumType === reg.passType)
-    const qrCodeDataUrl = await QRCode.toDataURL(reg.qrToken, {
-      width: 240,
-      margin: 2,
-      color: { dark: '#000000', light: '#FFFFFF' },
-    })
+    const qrCodeDataUrl = await generateQrDataUrl(reg.qrToken)
 
     return {
       id: reg.id,
