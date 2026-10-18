@@ -143,7 +143,7 @@ model SiteConfig {
   id               String   @id @default("global") @map("_id")
   heroTitle        String   @default("PEC E-SUMMIT 2026")
   heroSubtitle     String   @default("IGNITING ENTREPRENEURSHIP & INNOVATION")
-  summitDates      String   @default("MARCH 15–16, 2026")
+  summitDates      String   @default("NOVEMBER 14–15, 2026")
   summitVenue      String   @default("Punjab Engineering College, Sector 12, Chandigarh")
   heroVideoUrl     String?
   announcementText String?
@@ -212,7 +212,7 @@ model Speaker {
 model ScheduleItem {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   day       Int      // 1 or 2
-  date      String   // "MARCH 15, 2026"
+  date      String   // "NOVEMBER 14, 2026"
   time      String   // "09:30 AM"
   title     String
   tag       String   // "Main Stage", "Hacker Lab"

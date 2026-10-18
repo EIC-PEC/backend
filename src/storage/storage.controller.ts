@@ -116,7 +116,7 @@ export class StorageController {
   /** Only admins/organizers can check infrastructure status. */
   @Roles(Role.ADMIN)
   @Get('status')
-  @ApiOperation({ summary: 'Get Cloudflare R2 storage integration status (Admin only)' })
+  @ApiOperation({ summary: 'Get Cloudinary media storage integration status (Admin only)' })
   getStatus() {
     return this.storageService.getStatus()
   }
@@ -124,7 +124,7 @@ export class StorageController {
   @Roles(Role.ADMIN)
   @Post('upload')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Upload file to Cloudflare R2 bucket (Organizer+ only)' })
+  @ApiOperation({ summary: 'Upload file to Cloudinary media storage (Organizer+ only)' })
   @ApiConsumes('multipart/form-data', 'application/json')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MAX_UPLOAD_BYTES } }))
   async uploadFile(
